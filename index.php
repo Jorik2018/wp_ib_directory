@@ -2091,7 +2091,6 @@ add_action('rest_api_init',function(){
 		'methods' => 'DELETE',
 		'callback' => 'api_emed_file_delete',
 	));
-	
 	register_rest_route('/admin/desarrollo-social/api', '/cancer/(?P<from>\d+)/(?P<to>\d+)',array(
 		'methods' => 'GET',
 		'callback' => 'api_cancer_pag',
