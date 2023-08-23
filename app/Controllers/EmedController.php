@@ -348,21 +348,21 @@ class EmedController extends Controller
         if($action){
             foreach($action as $key=>&$row){
                 $row['emedId']=$o['id'];
-                $action[$key]=api_emed_action_post($row);
+                $action[$key]= $this->action_post($row);
             }
             $o['action']=$action;
         }
         if($damage_ipress){
             foreach($damage_ipress as $key=>&$row){
                 $row['emedId']=$o['id'];
-                $damage_ipress[$key]=api_emed_damage_ipress_post($row);
+                $damage_ipress[$key]= $this->damage_ipress_post($row);
             }
             $o['damage_ipress']=$damage_ipress;
         }
         if($damage_salud){
             foreach($damage_salud as $key=>&$row){
                 $row['emedId']=$o['id'];
-                $damage_salud[$key]=api_emed_damage_salud_post($row);
+                $damage_salud[$key]= $this->damage_salud_post($row);
             }
             $o['damage_salud']=$damage_salud;
         }
@@ -477,10 +477,10 @@ class EmedController extends Controller
         //$data=method_exists($data,'get_params')?$data->get_params():$data;
         $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed WHERE id=".$data['id']),ARRAY_A);
         if($wpdb->last_error )return t_error();
-        $o['files']=api_emed_file_pag(array("emed"=>$o['id']));
-        $o['action']=api_emed_action_pag(array("emed"=>$o['id']));
-        $o['damage_ipress']=api_emed_damage_ipress_pag(array("emed"=>$o['id']));
-        $o['damage_salud']=api_emed_damage_salud_pag(array("emed"=>$o['id']));
+        $o['files']= $this->file_pag(array("emed"=>$o['id']));
+        $o['action']= $this->action_pag(array("emed"=>$o['id']));
+        $o['damage_ipress']= $this->damage_ipress_pag(array("emed"=>$o['id']));
+        $o['damage_salud']= $this->damage_salud_pag(array("emed"=>$o['id']));
         return $o;
     }
 
