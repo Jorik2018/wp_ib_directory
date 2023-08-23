@@ -3,7 +3,6 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-require_once __DIR__ . '/../Util/Utils.php';
 use function IB\directory\Util\remove;
 
 class UserController extends Controller{
