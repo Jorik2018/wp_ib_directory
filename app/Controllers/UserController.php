@@ -45,7 +45,7 @@ class UserController extends Controller{
 
     function get(){
         $u=(array)wp_get_current_user();
-        $u['id']=remove($u,'ID');
+        $u['id']=\remove($u,'ID');
         return $u;
         /*return array('user'=>$u,
         'first_name'=>get_user_meta( $u->ID, 'first_name', true ),
