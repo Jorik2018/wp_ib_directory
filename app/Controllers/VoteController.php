@@ -1,12 +1,12 @@
 <?php
 
-namespace IB\cv\Controllers;
+namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\cv\Util;
+use IB\directory\Util;
 require_once __DIR__ . '/../Util/Utils.php';
 
-class EmedRestController extends Controller
+class VoteRestController extends Controller
 {
 
     public function rest_api_init(){

@@ -1,12 +1,12 @@
 <?php
 
-namespace IB\cv\Controllers;
+namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\cv\Util;
+use IB\directory\Util;
 require_once __DIR__ . '/../Util/Utils.php';
 
-class PregnantRestController extends Controller
+class PregnantController extends Controller
 {
 
     public function init(){

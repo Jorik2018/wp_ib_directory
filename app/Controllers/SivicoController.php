@@ -1,50 +1,31 @@
 <?php
 
-namespace IB\cv\Controllers;
+namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\cv\Util;
+use IB\directory\Util;
 require_once __DIR__ . '/../Util/Utils.php';
 
-class EmedRestController extends Controller
+class SivicoController extends Controller
 {
 
-    public function init(){
-        //   remove_role( 'emed_admin' );
-        //  remove_role( 'emed_register' );
-        add_role(
-            'emed_admin',
-            'emed_admin',
-            array(
-                'EMED_ADMIN' => true,
-                'EMED_READ' => true
-            )
-        );
-        add_role(
-            'emed_register',
-            'emed_register',
-            array(
-                'EMED_ADMIN' => true,
-                'EMED_READ' => true
-            )
-        );
-    }
+    public function init(){}
 
     public function rest_api_init()
     {
-        register_rest_route('api/desarrollo-social', '/red/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'red/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
             'callback' => array($this,'red_pag')
         ));
-        register_rest_route('api/desarrollo-social', '/cie/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'cie/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
             'callback' => array($this,'cie_pag')
         ));
-        register_rest_route('api/desarrollo-social', '/microred/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'microred/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'api_microred_pag', 
+            'callback' => array($this,'microred_pag') 
         ));
-        register_rest_route('api/desarrollo-social', '/establishment/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'establishment/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
             'callback' => array($this,'eess_pag')
         ));       
@@ -69,6 +50,31 @@ class EmedRestController extends Controller
             $r['code']=$r['codigo_red'];
         }
         $count=$wpdb->get_var('SELECT FOUND_ROWS()');
+        return $request['to']?array('data'=>$results,'size'=>$count):$results;
+    }
+    
+    function microred_pag($request) {
+        global $wpdb;
+        //$wpdb = new wpdb('grupoipe_wp980','20penud21.*.','grupoipe_vetatrem','localhost');
+        //$wpdb->show_errors();
+        $from=$request['from'];
+        $to=$request['to'];
+        if(!$to)$to=10000;
+        $wpdb->last_error  = '';
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_project.MAESTRO_MICRORED d WHERE 1=1 "
+            .($request->get_param('red')?"AND codigo_red=".$request->get_param('red'):"")." ORDER BY microred LIMIT ". $from.', '. $to,ARRAY_A );
+        if($wpdb->last_error )return new WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
+        $count = $wpdb->get_var('SELECT FOUND_ROWS()');
+        foreach ($results as &$r){
+            foreach ($r as $key => &$value){
+                $v=$r[$key];
+                //unset($r[$key]);
+                $r[strtolower($key)]=$v;
+            }
+            $r['name']=$r['microred'];
+            $r['code']=$r['codigo_cocadenado'];
+            
+        }
         return $request['to']?array('data'=>$results,'size'=>$count):$results;
     }
     

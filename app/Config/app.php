@@ -5,7 +5,7 @@
  */
 return [
 
-    'namespace' => 'IB\cv',
+    'namespace' => 'IB\directory',
 
     'type' => 'plugin',
 

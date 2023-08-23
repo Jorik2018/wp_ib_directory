@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "IB\\cv\\": "app"
+            "IB\\directory\\": "app"
         }
     },
     "minimum-stability": "dev",

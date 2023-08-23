@@ -1,65 +1,39 @@
 <?php
 
-namespace IB\cv\Controllers;
+namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\cv\Util;
+use IB\directory\Util;
 require_once __DIR__ . '/../Util/Utils.php';
 
-class EmedRestController extends Controller
+class DirectoryController extends Controller
 {
 
-    public function init(){
-        //   remove_role( 'emed_admin' );
-        //  remove_role( 'emed_register' );
-        add_role(
-            'emed_admin',
-            'emed_admin',
-            array(
-                'EMED_ADMIN' => true,
-                'EMED_READ' => true
-            )
-        );
-        add_role(
-            'emed_register',
-            'emed_register',
-            array(
-                'EMED_ADMIN' => true,
-                'EMED_READ' => true
-            )
-        );
-    }
+    public function init(){}
 
     public function rest_api_init(){
-        register_rest_route( 'api/directory','/region', array(
+        register_rest_route( 'api/directory','region', array(
             'methods' => 'GET',
-            'callback' => 'region_get',
+            'callback' => array($this,'region_get')
         ));
-        register_rest_route( 'api/directory','/region/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route( 'api/directory','region/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => 'region_get',
+            'callback' => array($this,'region_get')
         ));
-        register_rest_route('api/directory','/province/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory','province/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => 'province_get',
+            'callback' => array($this,'province_get')
         ));
-        register_rest_route('api/directory','/district/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory','district/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => 'district_get',
+            'callback' => array($this,'district_get')
         ));
-        register_rest_route('api/directory','/town/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory','town/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => 'cp_get',
+            'callback' => array($this,'cp_get')
         ));
     }
 
-    function region_get22() {
-        global $wpdb;
-        $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}users", OBJECT );
-        return $results;
-    }
-    
     function region_get() {
         global $wpdb;
         $wpdb->last_error  = '';

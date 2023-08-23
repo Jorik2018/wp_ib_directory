@@ -2,7 +2,7 @@
 
 /* file: app/Util/Utils.php */
 
-namespace IB\cv\Util;
+namespace IB\directory\Util;
 
 use WPMVC\Bridge;
 

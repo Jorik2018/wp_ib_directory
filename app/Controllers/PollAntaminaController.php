@@ -1,93 +1,106 @@
 <?php
 
-namespace IB\cv\Controllers;
+namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\cv\Util;
+use IB\directory\Util;
 require_once __DIR__ . '/../Util/Utils.php';
 
-class SivicoRestController extends Controller
+class PollAntaminaController extends Controller
 {
 
     public function init(){
         add_role(
-            'pregnant_admin',
-            'pregnant_admin',
+            'supervisor',
+            'Supervisor',
             array(
-                'PREGNANT_ADMIN'         => true,
-                'PREGNANT_READ'         => true
-            )
-        );
-        add_role(
-            'pregnant_register',
-            'pregnant_register',
-            array(
-                'PREGNANT_REGISTER'         => true,
-                'PREGNANT_READ'         => true
+                'supervise'         => true
             )
         );
     }
 
-    public function rest_api_init()
-    {
-        register_rest_route( '/admin/desarrollo-social/api','/sivico/bulk', array(
+    public function rest_api_init(){
+        register_rest_route( 'api','/poll', array(
             'methods' => 'POST',
-            'callback' => 'api_sivico_bulk_func',
+            'callback' => array($this,'api_poll_post')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/(?P<id>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_get',
+        register_rest_route( 'api/poll','/main', array(
+            'methods' => 'POST',
+            'callback' => array($this,'api_poll_post')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/(?P<id>\d+)',array(
+        register_rest_route( 'api/poll','/bulk/(?P<poll>\d+)', array(
+            'methods' => 'POST',
+            'callback' => array($this,'api_poll_bulk_func')
+        ));
+        register_rest_route('api/poll','/people', array(
+            'methods' => 'POST',
+            'callback' => array($this,'api_poll_people_post')
+        ));
+        register_rest_route('api/poll', '/people/(?P<id>\d+)', array(
             'methods' => 'DELETE',
-            'callback' => 'api_sivico_delete',
+            'callback' => array($this,'api_poll_people_delete')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/(?P<from>\d+)/(?P<to>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_pag',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico',array(
+        register_rest_route( 'api/poll','/search/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'POST',
-            'callback' => 'api_sivico_post',
+            'callback' => array($this,'api_search_func')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/people',array(
+        register_rest_route('api/poll', '/(?P<id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_poll_get')
+        ));
+        register_rest_route('api/poll', '/sample/(?P<from>\d+)/(?P<to>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_town_sample_get')
+        ));
+        register_rest_route('api/poll','/(?P<from>\d+)/(?P<to>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_poll_pag')
+        ));
+        register_rest_route('api/poll','/people/(?P<from>\d+)/(?P<to>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_poll_people_pag')
+        ));
+        register_rest_route('api/poll', '/people/(?P<id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_poll_people_get')
+        ));
+        register_rest_route( 'api/poll','/supervisor', array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_supervisor_func')
+        ));
+        register_rest_route('/api/directory', '/people',array(
+            'methods' => 'GET',
+            'callback' => array($this,'api_directory_people_get')
+        ));
+        register_rest_route( 'api','/poll', array(
             'methods' => 'POST',
-            'callback' => 'api_sivico_people_post',
+            'callback' => array($this,'api_poll_post')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/search/(?P<from>\d+)/(?P<to>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_search',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/people/(?P<id>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_people_get',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/people/(?P<id>\d+)',array(
-            'methods' => 'DELETE',
-            'callback' => 'api_sivico_people_delete',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/people/(?P<from>\d+)/(?P<to>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_people_pag',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/agreement/(?P<id>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_agreement_get',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/agreement/(?P<id>\d+)',array(
-            'methods' => 'DELETE',
-            'callback' => 'api_sivico_agreement_delete',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/agreement/(?P<from>\d+)/(?P<to>\d+)',array(
-            'methods' => 'GET',
-            'callback' => 'api_sivico_agreement_pag',
-        ));
-        register_rest_route('/admin/desarrollo-social/api', '/sivico/agreement',array(
-            'methods' => 'POST',
-            'callback' => 'api_sivico_agreement_post',
-        ));       
     }
+
     
+    function api_voting_act_func($request) {
+        global $wpdb;
+        $r=$request->get_params();
+        unset($r['lugar']);
+        $current_user = wp_get_current_user();
+        $r['registrador']=$current_user->user_login;
+        $r['registrador_id']=$current_user->ID;
+        $results = $wpdb->get_results( "SELECT * FROM acta d WHERE d.mesa=".$r['mesa']);
+        $id=0;
+        if(!empty($results)){ 
+            foreach($results as $row){ 
+                $id=$row->id;  
+                $updated = $wpdb->update('acta', $r, array(id=>$id) );
+                $r['id']=$id;
+            }
+        }else{
+            $updated = $wpdb->insert('acta',$r);
+            $r['id']=$wpdb->insert_id;
+        }
+        if(false === $updated)return t_error();
+        return $r;
+    }
 
     function api_poll_bulk_func($request) {
         global $wpdb;
@@ -102,7 +115,7 @@ class SivicoRestController extends Controller
         }
         return $aux;
     }
-    
+
     function api_poll_post($request) {
         global $wpdb;
         $current_user = wp_get_current_user();
@@ -143,7 +156,7 @@ class SivicoRestController extends Controller
         $wpdb->query('COMMIT');
         return $o;
     }
-    
+
     function api_poll_people_post($request) {
         global $wpdb;
         $current_user = wp_get_current_user();
@@ -171,7 +184,7 @@ class SivicoRestController extends Controller
         }
         return $o;
     }
-    
+
     function api_poll_people_delete($request){
         global $wpdb;
         $poll=$request->get_param('poll');
@@ -180,6 +193,16 @@ class SivicoRestController extends Controller
         if($wpdb->last_error )return t_error();
         return $row;
     }
+
+    function api_poll_search_func($data){
+        global $wpdb;$edb=2;
+        $from=$data['from'];
+        $to=$data['to'];$wpdb->last_error  = '';
+        $results = $wpdb->get_results('SELECT * FROM encuesta'.$edb.'_people d'.($to?'  LIMIT '. $from.', '. ($to-$from):''), OBJECT );
+        if($wpdb->last_error )return t_error();
+        return $results;
+    }
+
     function api_poll_get($request){
         global $wpdb;
         $current_user = wp_get_current_user();
@@ -189,13 +212,13 @@ class SivicoRestController extends Controller
         if($wpdb->last_error )return t_error();
         return $o;
     }
-    
+
     function api_poll_people_get($request){
         global $wpdb;
         $poll=$request['poll'];
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM encuesta_people_".$poll." WHERE id=".$request['id']));
     }
-    
+
     function api_poll_pag($request){
         global $wpdb;
         $current_user=wp_get_current_user();
@@ -208,7 +231,7 @@ class SivicoRestController extends Controller
         $count=$wpdb->get_var('SELECT FOUND_ROWS()');
         return array('data'=>$results,'size'=>$count);
     }
-    
+
     function api_poll_people_pag($data){
         global $wpdb;
         $q=$data->get_param('query');
@@ -224,6 +247,71 @@ class SivicoRestController extends Controller
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
         return array('data'=>$results,'size'=>$count);
     }
+
+
     
+
+    function api_supervisor_func(){
+        $results = $GLOBALS['wpdb']->get_results( "SELECT  um.user_id,u.display_name,meta_value as supervisor
+        FROM `wpsy_usermeta` um
+        INNER JOIN wpsy_users u ON u.ID=um.user_id
+        WHERE `meta_key`='supervisor'", OBJECT );
+        $current_user = wp_get_current_user();
+    
+        return  array($results,$current_user);
+    }
+
+    function ib_user_profile_fields( $user ) {
+    $results = $GLOBALS['wpdb']->get_results( "SELECT  um.user_id,u.display_name
+    FROM `wpsy_usermeta` um
+    INNER JOIN wpsy_users u ON u.ID=um.user_id
+    WHERE `meta_key`='wpsy_capabilities' and `meta_value` like '%supervisor%'", OBJECT );
+
+    $user_id=get_the_author_meta( 'supervisor', $user->ID );
+    ?>
+        <table class="form-table">
+        <tr>
+        <th><label for="postalcode"><?php _e("Supervisor"); ?></label></th>
+            <td>
+                <select name="supervisor">
+                    <option value="" <?=!$user_id?'selected="selected"':''?>  >--Select Option--</option>
+                    <?
+                    foreach ($results as $r){
+                        ?>
+                        
+                        <option <?=$r->user_id==$user_id?'selected="selected"':''?> value="<?=$r->user_id?>" ><?=$r->display_name?></option>
+                        
+                        <?}
+                    ?>
+                </select>
+            </td>
+        </tr>
+        </table>
+    <?php }
+
+    function save_ib_user_profile_fields( $user_id ) {
+        update_user_meta( $user_id, 'supervisor', $_POST['supervisor'] );
+    }
+
+    function api_covid($request) {
+        global $wpdb;
+        $r=$request->get_params();
+        $current_user = wp_get_current_user();
+            // create curl resource
+            $ch = curl_init();
+
+            // set url
+            curl_setopt($ch, CURLOPT_URL, "http://web.regionancash.gob.pe/admin/desarrollo-social/api/covid/vaccine-covid/0/10?query=".$r['query']);
+
+            //return the transfer as a string
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            // $output contains the output string
+            $output = curl_exec($ch);
+
+            // close curl resource to free up system resources
+            curl_close($ch);    
+            die($output);
+    }
 
 }

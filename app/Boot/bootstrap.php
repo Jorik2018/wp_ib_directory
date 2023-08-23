@@ -11,7 +11,18 @@ use WPMVC\Config;
  * @version 1.0.4
  */
 
-require_once( __DIR__ . '/../../vendor/autoload.php' );
+$GLOBALS['PREFIX_LENGTHS_PSR4'] = array('I' => array ('IB\\directory\\' => 13));
+$GLOBALS['PREFIX_DIRS_PSR4'] = array('IB\\directory\\' => array (0 => __DIR__ . '/../..' . '/app'));
+$GLOBALS['CLASS_MAP'] = array(
+    'IB\\directory\\Controllers\\AdminController' => __DIR__ . '/../..' . '/app/Controllers/AdminController.php',
+    'IB\\directory\\Controllers\\CancerController' => __DIR__ . '/../..' . '/app/Controllers/CancerController.php',
+    'IB\\directory\\Controllers\\DirectoryController' => __DIR__ . '/../..' . '/app/Controllers/DirectoryController.php',
+    'IB\\directory\\Main' => __DIR__ . '/../..' . '/app/Main.php'
+);
+
+$GLOBALS['PLUGIN']='DIRECTORY';
+//require_once
+require( __DIR__ . '/../../../ib-hr/vendor/autoload.php' );
 
 $config = include( plugin_dir_path( __FILE__ ) . '../Config/app.php' );
 

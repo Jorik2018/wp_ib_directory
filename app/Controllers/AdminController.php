@@ -1,6 +1,6 @@
 <?php
 
-namespace IB\cv\Controllers;
+namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
 /**
@@ -92,10 +92,6 @@ class AdminController extends Controller
         register_rest_route('/api/file', '/upload',array(
             'methods' => 'POST',
             'callback' => array($this,'upload_post')
-        ));
-        register_rest_route('/api/directory', '/people',array(
-            'methods' => 'GET',
-            'callback' => 'api_directory_people_get',
         ));
     }
 
