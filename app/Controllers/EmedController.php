@@ -9,8 +9,6 @@ class EmedController extends Controller
 {
 
     public function init(){
-        //   remove_role( 'emed_admin' );
-        //  remove_role( 'emed_register' );
         add_role(
             'emed_admin',
             'emed_admin',
@@ -33,71 +31,71 @@ class EmedController extends Controller
     {
         register_rest_route('api/desarrollo-social', '/emed/bulk',array(
             'methods' => 'POST',
-            'callback' => 'bulk',
+            'callback' => array($this,'bulk')
         ));
         register_rest_route('api/desarrollo-social', '/emed',array(
             'methods' => 'POST',
-            'callback' => 'post',
+            'callback' => array($this,'post')
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'get',
+            'callback' => array($this,'get')
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<pregnant>\d+)/visit/number',array(
             'methods' => 'GET',
-            'callback' => 'visit_number_get',
+            'callback' => array($this,'visit_number_get')
         ));
         register_rest_route('api/desarrollo-social', '/emed/visit/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'visit_get',
+            'callback' => array($this,'visit_get')
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<id>\d+)',array(
             'methods' => 'DELETE',
-            'callback' => 'delete',
+            'callback' => array($this,'delete')
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'pag',
+            'callback' => array($this,'pag')
         ));
         register_rest_route('api/desarrollo-social', '/emed/resource/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'resource_pag',
+            'callback' => array($this,'resource_pag')
         ));
         register_rest_route('api/desarrollo-social', '/emed/resource',array(
             'methods' => 'POST',
-            'callback' => 'resource_post',
+            'callback' => array($this,'resource_post')
         ));
         register_rest_route('api/desarrollo-social', '/emed/action',array(
             'methods' => 'POST',
-            'callback' => 'action_post',
+            'callback' => array($this,'action_post')
         ));
         register_rest_route('api/desarrollo-social', '/emed/action/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'action_get',
+            'callback' => array($this,'action_get')
         ));
         register_rest_route('api/desarrollo-social', '/emed/action/(?P<id>\d+)',array(
             'methods' => 'DELETE',
-            'callback' => 'action_delete',
+            'callback' => array($this,'action_delete')
         ));
         register_rest_route('api/desarrollo-social', '/emed/action/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'action_pag',
+            'callback' => array($this,'action_pag')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress',array(
             'methods' => 'POST',
-            'callback' => 'damage_ipress_post',
+            'callback' => array($this,'damage_ipress_post')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'damage_ipress_get',
+            'callback' => array($this,'damage_ipress_get')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<id>\d+)',array(
             'methods' => 'DELETE',
-            'callback' => 'damage_ipress_delete',
+            'callback' => array($this,'damage_ipress_delete')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'damage_ipress_pag',
+            'callback' => array($this,'damage_ipress_pag')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
