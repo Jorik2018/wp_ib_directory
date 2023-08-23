@@ -3,8 +3,7 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\directory\Util;
-require_once __DIR__ . '/../Util/Utils.php';
+use function IB\directory\Util\remove;
 
 class EmedController extends Controller
 {
@@ -102,31 +101,31 @@ class EmedController extends Controller
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'damage_salud_pag',
+            'callback' => array($this,'damage_salud_pag')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud',array(
             'methods' => 'POST',
-            'callback' => 'damage_salud_post',
+            'callback' => array($this,'damage_salud_post')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'damage_salud_get',
+            'callback' => array($this,'damage_salud_get')
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<id>\d+)',array(
             'methods' => 'DELETE',
-            'callback' => 'damage_salud_delete',
+            'callback' => array($this,'damage_salud_delete')
         ));
         register_rest_route('api/desarrollo-social', '/emed/file',array(
             'methods' => 'POST',
-            'callback' => 'file_post',
+            'callback' => array($this,'file_post')
         ));
         register_rest_route('api/desarrollo-social', '/emed/file/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'file_pag',
+            'callback' => array($this,'file_pag')
         ));
         register_rest_route('api/desarrollo-social', '/emed/file/(?P<id>\d+)',array(
             'methods' => 'DELETE',
-            'callback' => 'file_delete',
+            'callback' => array($this,'file_delete')
         ));
     }
 
