@@ -21,7 +21,7 @@ class UserController extends Controller{
     }
 
     public function rest_api_init(){
-        register_rest_route(self::API_USER, '', array(
+        register_rest_route(self::API_USER, '/', array(
             'methods' => 'GET',
             'callback' => array($this,'get')
         ));
