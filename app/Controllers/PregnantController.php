@@ -3,8 +3,8 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\directory\Util;
-require_once __DIR__ . '/../Util/Utils.php';
+use function IB\directory\Util\remove;
+use function IB\directory\Util\cfield;
 
 class PregnantController extends Controller
 {
@@ -31,67 +31,67 @@ class PregnantController extends Controller
     public function rest_api_init()
     {
  
-        register_rest_route( 'api/desarrollo-social','/pregnant', array(
+        register_rest_route( 'api/desarrollo-social','pregnant', array(
             'methods' => 'POST',
             'callback' => array($this,'post')
         ));
 
-        register_rest_route( 'api/desarrollo-social','/pregnant/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route( 'api/desarrollo-social','pregnant/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
             'callback' => array($this,'pag')
         ));
 
-        register_rest_route( 'api/desarrollo-social','/pregnant/(?P<id>\d+)', array(
+        register_rest_route( 'api/desarrollo-social','pregnant/(?P<id>\d+)', array(
             'methods' => 'GET',
             'callback' => array($this,'get')
         ));
 
-        register_rest_route( 'api/desarrollo-social', '/pregnant/(?P<id>)',array(
+        register_rest_route( 'api/desarrollo-social', 'pregnant/(?P<id>)',array(
             'methods' => 'DELETE',
             'callback' => array($this,'delete')
         ));
 
-        register_rest_route('api/desarrollo-social', '/pregnant/bulk',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/bulk',array(
             'methods' => 'POST',
             'callback' => array($this,'bulk')
         ));
 
 
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/bulk',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/bulk',array(
             'methods' => 'POST',
-            'callback' => 'api_pregnant_bulk',
+            'callback' => array($this,'bulk')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant',array(
+        register_rest_route('api/desarrollo-social', 'pregnant',array(
             'methods' => 'POST',
-            'callback' => 'api_pregnant_post',
+            'callback' => array($this,'post')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/(?P<id>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'api_pregnant_get',
+            'callback' => array($this,'get')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/(?P<pregnant>\d+)/visit/number',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/(?P<pregnant>\d+)/visit/number',array(
             'methods' => 'GET',
-            'callback' => 'api_pregnant_visit_number_get',
+            'callback' => array($this,'visit_number_get')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/visit/(?P<id>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/visit/(?P<id>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'api_pregnant_visit_get',
+            'callback' => array($this,'visit_get')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/(?P<id>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/(?P<id>\d+)',array(
             'methods' => 'DELETE',
-            'callback' => 'api_pregnant_delete',
+            'callback' => array($this,'delete')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'api_pregnant_pag',
+            'callback' => array($this,'pag')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/visit/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/visit/(?P<from>\d+)/(?P<to>\d+)',array(
             'methods' => 'GET',
-            'callback' => 'api_pregnant_visit_pag',
+            'callback' => array($this,'visit_pag')
         ));
-        register_rest_route('/admin/desarrollo-social/api', '/pregnant/visit',array(
+        register_rest_route('api/desarrollo-social', 'pregnant/visit',array(
             'methods' => 'POST',
-            'callback' => 'api_pregnant_visit_post',
+            'callback' => array($this,'visit_post')
         ));
     }
 
@@ -178,7 +178,7 @@ class PregnantController extends Controller
         if($visits){
             foreach($visits as $key=>&$visit){
                 $visit['pregnantId']=$o['id'];
-                $visits[$key]=api_pregnant_visit_post($visit);
+                $visits[$key]=visit_post($visit);
             }
             $o['visits']=$visits;
         }
@@ -213,7 +213,7 @@ class PregnantController extends Controller
         cdfield($o,'gestanteFUR');
         cdfield($o,'gestanteFPP');
         $o['ext']=array();
-        $o['visits']=api_pregnant_visit_pag(array("gestanteId"=>$o['id']));
+        $o['visits']=visit_pag(array("gestanteId"=>$o['id']));
         return $o;
     }
 
@@ -286,7 +286,7 @@ class PregnantController extends Controller
         return $row;
     }
 
-    function api_pregnant_visit_post(&$request) {
+    function visit_post(&$request) {
         global $wpdb;
         $o=method_exists($request,'get_params')?$request->get_params():$request;
         $current_user = wp_get_current_user();
@@ -346,7 +346,7 @@ class PregnantController extends Controller
         return $o;
     }
 
-    function api_pregnant_visit_number_get($request){
+    function visit_number_get($request){
         global $wpdb;
         $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM ds_gestante_visita WHERE gestante_id=".$request['pregnant']),ARRAY_A);
         return $max['max'];
