@@ -3,8 +3,7 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\directory\Util;
-require_once __DIR__ . '/../Util/Utils.php';
+use function IB\directory\Util\t_error;
 
 class SivicoController extends Controller
 {

@@ -5,6 +5,7 @@ namespace IB\directory\Controllers;
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
+use function IB\directory\Util\t_error;
 
 class CancerController extends Controller
 {
