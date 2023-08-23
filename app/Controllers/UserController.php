@@ -3,8 +3,8 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use IB\directory\Util;
 require_once __DIR__ . '/../Util/Utils.php';
+use function IB\directory\Util\remove;
 
 class UserController extends Controller{
 
@@ -45,7 +45,7 @@ class UserController extends Controller{
 
     function get(){
         $u=(array)wp_get_current_user();
-        $u['id']=\remove($u,'ID');
+        $u['id']=remove($u,'ID');
         return $u;
         /*return array('user'=>$u,
         'first_name'=>get_user_meta( $u->ID, 'first_name', true ),
