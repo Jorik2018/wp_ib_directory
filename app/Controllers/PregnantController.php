@@ -7,6 +7,7 @@ use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
 use function IB\directory\Util\camelCase;
 use function IB\directory\Util\cdfield;
+use function IB\directory\Util\t_error;
 
 class PregnantController extends Controller
 {
@@ -215,7 +216,7 @@ class PregnantController extends Controller
         cdfield($o,'gestanteFUR');
         cdfield($o,'gestanteFPP');
         $o['ext']=array();
-        $o['visits']=visit_pag(array("gestanteId"=>$o['id']));
+        $o['visits']= $this->visit_pag(array("gestanteId"=>$o['id']));
         return $o;
     }
 
