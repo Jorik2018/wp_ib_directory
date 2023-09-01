@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace IB\directory;
 
 use WPMVC\Bridge;
+require_once __DIR__ . '/Util/Utils.php';
 
 add_filter( 'woocommerce_prevent_admin_access', '__return_false' );
 
