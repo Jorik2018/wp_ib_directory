@@ -135,13 +135,13 @@ class VeaPaternidadController extends Controller {
         if($o['id']>0){
             $o['user_register']=$current_user->user_login;
             $o['uid_update']=$current_user->ID;
-            $updated = $wpdb->update('ds_vea_paternidad',$o,array('id'=>$o['id']));
+            $updated = $wpdb->update('ds_vea_materno',$o,array('id'=>$o['id']));
         }else{
             $o['uid_insert']=$current_user->ID;
             $o['user_modificacion']=$current_user->user_login;
             unset($o['id']);
             if($tmpId)$o['offline']=$tmpId;
-            $updated = $wpdb->insert('ds_vea_paternidad',$o);
+            $updated = $wpdb->insert('ds_vea_materno',$o);
             $o['id']=$wpdb->insert_id;
             $inserted=true;
         }
@@ -182,7 +182,7 @@ class VeaPaternidadController extends Controller {
     public function get($request){    
         global $wpdb;
         //$data=method_exists($data,'get_params')?$data->get_params():$data;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_vea_paternidad WHERE id=".$request['id']),ARRAY_A);
+        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_vea_materno WHERE id=".$request['id']),ARRAY_A);
         if($wpdb->last_error )return t_error();
         foreach(['establecimiento_salud', 'codigo_EESS', 'codigo_CCPP','emergency_red','emergency_microred' ,'descripcion_sector', 'descripcion_direccion', 'numero_DNI', 'apellido_paterno',
         'apellido_materno', 'fecha_nacimiento', 'estado_civil', 'grado_instruccion', 'gestante_numero_celular', 'gestante_familia_celular', 
@@ -219,8 +219,8 @@ class VeaPaternidadController extends Controller {
     
     
     
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed,COUNT(v.id) AS visits FROM ds_vea_paternidad g ".
-            "LEFT JOIN ds_vea_paternidad_visita v ON v.gestante_id=g.id 
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed,COUNT(v.id) AS visits FROM ds_vea_materno g ".
+            "LEFT JOIN ds_vea_materno_visita v ON v.gestante_id=g.id 
             LEFT JOIN grupoipe_project.MAESTRO_RED r ON r.codigo_red=g.red
             LEFT JOIN grupoipe_project.MAESTRO_MICRORED mr ON mr.codigo_cocadenado=g.microred
             WHERE g.canceled=0 ".(isset($numeroDNI)?" AND g.numero_dni like '%$numeroDNI%' ":"")
@@ -253,7 +253,7 @@ class VeaPaternidadController extends Controller {
         $gestanteId=method_exists($request,'get_param')?$request->get_param('gestanteId'):$request['gestanteId'];
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM ds_vea_paternidad_visita d Where canceled=0 ".($gestanteId?"AND gestante_id=$gestanteId":"")." ORDER BY id desc ".($to?"LIMIT ". $from.', '. $to:""),ARRAY_A);
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM ds_vea_materno_visita d Where canceled=0 ".($gestanteId?"AND gestante_id=$gestanteId":"")." ORDER BY id desc ".($to?"LIMIT ". $from.', '. $to:""),ARRAY_A);
         if($wpdb->last_error )return t_error();
         foreach ($results as &$r){
             cfield($r,'fecha_visita','fechaVisita');
@@ -268,7 +268,7 @@ class VeaPaternidadController extends Controller {
 
     public function delete($data){
         global $wpdb;
-        $row = $wpdb->update('ds_vea_paternidad',array('canceled'=>1),array('id'=>$data['id']));
+        $row = $wpdb->update('ds_vea_materno',array('canceled'=>1),array('id'=>$data['id']));
         return $row;
     }
 
@@ -292,15 +292,15 @@ class VeaPaternidadController extends Controller {
         $inserted=0;
         if($o['id']>0){
             $o['updated_date']=current_time('mysql', 1);
-            $updated=$wpdb->update('ds_vea_paternidad_visita',$o,array('id'=>$o['id']));
+            $updated=$wpdb->update('ds_vea_materno_visita',$o,array('id'=>$o['id']));
         }else{
             unset($o['id']);
-            $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM ds_vea_paternidad_visita WHERE gestante_id=".$o['gestante_id']),ARRAY_A);
+            $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM ds_vea_materno_visita WHERE gestante_id=".$o['gestante_id']),ARRAY_A);
             $o['numero_visita']=$max['max'];
             $o['user_register']=$current_user->user_login;
             $o['inserted_date']=current_time('mysql', 1);
             if($tmpId)$o['offline']=$tmpId;
-            $updated=$wpdb->insert('ds_vea_paternidad_visita',$o);
+            $updated=$wpdb->insert('ds_vea_materno_visita',$o);
             $o['id']=$wpdb->insert_id;
             $inserted=1;
         }
@@ -321,7 +321,7 @@ class VeaPaternidadController extends Controller {
     function visit_get($data){
         global $wpdb;
         //$data=method_exists($data,'get_params')?$data->get_params():$data;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_vea_paternidad_visita WHERE id=".$data['id']),ARRAY_A);
+        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_vea_materno_visita WHERE id=".$data['id']),ARRAY_A);
         if($wpdb->last_error )return t_error();
         cfield($o,'fecha_visita','fechaVisita');
         cdfield($o,'fechaProxVisita');
@@ -334,7 +334,7 @@ class VeaPaternidadController extends Controller {
 
     function visit_number_get($request){
         global $wpdb;
-        $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM ds_vea_paternidad_visita WHERE gestante_id=".$request['pregnant']),ARRAY_A);
+        $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM ds_vea_materno_visita WHERE gestante_id=".$request['pregnant']),ARRAY_A);
         return $max['max'];
     }
     
