@@ -9,7 +9,7 @@ use function IB\directory\Util\camelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 
-class VeaPaternidadController extends Controller {
+class VeaMaternoController extends Controller {
 
     public function init() {
         add_role(
