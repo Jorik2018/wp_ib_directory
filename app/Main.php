@@ -21,8 +21,8 @@ class Main extends Bridge {
     }
 
     public function init() {
-        $this->add_action( 'rest_api_init','VeaPaternidadController@rest_api_init');
-        $this->add_action( 'init','VeaPaternidadController@init');
+        $this->add_action( 'rest_api_init','VeaMaternoController@rest_api_init');
+        $this->add_action( 'init','VeaMaternoController@init');
         $this->add_action( 'rest_api_init','AdminController@rest_api_init');
         $this->add_action( 'init','AdminController@init');
         $this->add_action( 'rest_api_init','CancerController@rest_api_init');
