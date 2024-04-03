@@ -219,7 +219,7 @@ class VeaMaternoController extends Controller {
     
     
     
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed,COUNT(v.id) AS visits FROM ds_vea_materno g ".
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed FROM ds_vea_materno g ".
             "LEFT JOIN grupoipe_project.MAESTRO_RED r ON r.codigo_red=g.red
             LEFT JOIN grupoipe_project.MAESTRO_MICRORED mr ON mr.codigo_cocadenado=g.microred
             WHERE g.canceled=0 ".(isset($numeroDNI)?" AND g.numero_dni like '%$numeroDNI%' ":"")
