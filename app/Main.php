@@ -10,19 +10,19 @@ add_filter( 'woocommerce_prevent_admin_access', '__return_false' );
 
 add_filter( 'woocommerce_disable_admin_bar', '__return_false' );
 
-class Main extends Bridge
-{
-    public function api_covid(){
+class Main extends Bridge {
+
+    public function api_covid() {
         return 2;
     }
 
-    public function return_view()
-    {
+    public function return_view() {
         return $this->mvc->view->get( 'view.key' );
     }
 
-    public function init()
-    {
+    public function init() {
+        $this->add_action( 'rest_api_init','VeaPaternidadController@rest_api_init');
+        $this->add_action( 'init','VeaPaternidadController@init');
         $this->add_action( 'rest_api_init','AdminController@rest_api_init');
         $this->add_action( 'init','AdminController@init');
         $this->add_action( 'rest_api_init','CancerController@rest_api_init');
@@ -49,8 +49,8 @@ class Main extends Bridge
         $this->add_action( 'edit_user_profile', 'UserController@edit_user_profile' );
     }
 
-    public function on_admin()
-    {
+    public function on_admin() {
         $this->add_action('admin_menu', 'AdminController@init');
     }
+
 }
