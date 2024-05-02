@@ -95,7 +95,7 @@ function remove(array &$arr, $key) {
 
 function t_error($msg=false){
     global $wpdb;
-    $error=new WP_Error(500,$msg?$msg:$wpdb->last_error, array('status'=>500));
+    $error=new \WP_Error(500,$msg?$msg:$wpdb->last_error, array('status'=>500));
     $wpdb->query('ROLLBACK');
     return $error;
 }
