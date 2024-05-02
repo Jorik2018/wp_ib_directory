@@ -125,7 +125,7 @@ class VeaMaternoController extends Controller {
         //quitar donde se guarda la imagen del familiograma
         unset($o['ext']);
         
-        $o['updated_date']=current_time('mysql', 1);
+        $o['update_date']=current_time('mysql', 1);
         if($migration){
             $o['migracion_fecha']=current_time('mysql', 1);
             
