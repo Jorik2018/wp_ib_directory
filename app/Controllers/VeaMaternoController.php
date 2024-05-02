@@ -199,7 +199,6 @@ class VeaMaternoController extends Controller {
         cdfield($o,'gestanteFUR');
         cdfield($o,'gestanteFPP');
         $o['ext']=array();
-        $o['visits']= $this->visit_pag(array("gestanteId"=>$o['id']));
         return $o;
     }
 
