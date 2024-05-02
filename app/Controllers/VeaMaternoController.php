@@ -104,7 +104,7 @@ class VeaMaternoController extends Controller {
         'apellido_materno', 'fecha_nacimiento', 'estado_civil', 'grado_instruccion', 'gestante_numero_celular', 'gestante_familia_celular', 
         'gestante_numero', 'gestante_paridad', 'gestante_FUR', 'gestante_FPP', 'gestante_edad_gestacional_semanas', 'gestante_riesgo_obstetrico', 
         'lugar_IPRESS', 'lugar_diagnostico', 'lugar_fecha_emergencia', 'lugar_fecha_referida', 'migracion_IPRESS', 
-        'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_register', 'user_modificacion'] as &$k){
+        'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_register', 'user_update'] as &$k){
             cfield($o,camelCase($k),$k);
         }
         cfield($o,'codigoEESS','codigo_EESS');
@@ -138,7 +138,7 @@ class VeaMaternoController extends Controller {
             $updated = $wpdb->update('ds_vea_materno',$o,array('id'=>$o['id']));
         }else{
             $o['uid_insert']=$current_user->ID;
-            $o['user_modificacion']=$current_user->user_login;
+            $o['user_update']=$current_user->user_login;
             unset($o['id']);
             if($tmpId)$o['offline']=$tmpId;
             $updated = $wpdb->insert('ds_vea_materno',$o);
@@ -188,7 +188,7 @@ class VeaMaternoController extends Controller {
         'apellido_materno', 'fecha_nacimiento', 'estado_civil', 'grado_instruccion', 'gestante_numero_celular', 'gestante_familia_celular', 
         'gestante_numero', 'gestante_paridad', 'gestante_FUR', 'gestante_FPP', 'gestante_edad_gestacional_semanas', 'gestante_riesgo_obstetrico', 
         'lugar_IPRESS', 'lugar_diagnostico', 'lugar_fecha_emergencia', 'lugar_fecha_referida', 'migracion_IPRESS', 
-        'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_register', 'user_modificacion'] as &$k){
+        'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_register', 'user_update'] as &$k){
             cfield($o,$k,camelCase($k));
         }
         cfield($o,'codigo_eess','codigoEESS');
