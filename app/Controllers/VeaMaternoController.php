@@ -104,7 +104,8 @@ class VeaMaternoController extends Controller {
         'apellido_materno', 'fecha_nacimiento', 'estado_civil', 'grado_instruccion', 'gestante_numero_celular', 'gestante_familia_celular', 
         'gestante_numero', 'gestante_paridad', 'gestante_FUR', 'gestante_FPP', 'gestante_edad_gestacional_semanas', 'gestante_riesgo_obstetrico', 
         'lugar_IPRESS', 'lugar_diagnostico', 'lugar_fecha_emergencia', 'lugar_fecha_referida', 'migracion_IPRESS', 
-        'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_update'] as &$k){
+        'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_update',
+        'ipress_1','ipress_2','ipress_3','ipress_4','ipress_5','ipress_6'] as &$k){
             cfield($o,camelCase($k),$k);
         }
         cfield($o,'codigoEESS','codigo_EESS');
