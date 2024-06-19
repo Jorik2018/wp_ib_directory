@@ -22,7 +22,7 @@ $GLOBALS['CLASS_MAP'] = array(
 
 $GLOBALS['PLUGIN']='DIRECTORY';
 //require_once
-require( __DIR__ . '/../../../ib-hr/vendor/autoload.php' );
+require( __DIR__ . '/../../autoload.php' );
 
 $config = include( plugin_dir_path( __FILE__ ) . '../Config/app.php' );
 

@@ -10,7 +10,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": ">=5.4.0",
+        "php": "^7.4",
         "10quality/wpmvc-core": "^3.1",
         "imangazaliev/didom": "^2.0"
     },
@@ -19,7 +19,9 @@
     },
     "config": {
         "optimize-autoloader": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "vendor-dir": "../vendor",
+        "autoloader-suffix":"wp_ib_directory"
     },
     "autoload": {
         "psr-4": {
