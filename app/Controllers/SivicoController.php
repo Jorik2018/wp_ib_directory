@@ -42,8 +42,8 @@ class SivicoController extends Controller
         $to=$request['to'];
         
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_project.MAESTRO_RED d ORDER BY red".($to?"LIMIT ". $from.', '. $to:""),ARRAY_A );
-        if($wpdb->last_error )return new WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_red d ORDER BY red".($to?"LIMIT ". $from.', '. $to:""),ARRAY_A );
+        if($wpdb->last_error )return new \WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
         foreach ($results as &$r){
             foreach ($r as $key => &$value){
                 $v=$r[$key];

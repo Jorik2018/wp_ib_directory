@@ -22,7 +22,7 @@ class PollAntaminaController extends Controller
         );
     }
 
-    public function rest_api_init(){
+    public function rest_api_init(){return;
         register_rest_route( 'api','/poll', array(
             'methods' => 'POST',
             'callback' => array($this,'api_poll_post')

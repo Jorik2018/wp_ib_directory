@@ -130,4 +130,15 @@ class UserController extends Controller{
         update_user_meta( $user_id, 'supervisor', $_POST['supervisor'] );
     }
 
+    function modify_jwt_auth_response($response, $user) {
+        // Modify the response data as needed
+        $response['custom_data'] = 'This is some custom data';
+        
+        // Example: Add user meta data to the response
+        //$user_meta = get_user_meta($user->ID);
+        $token = $response['data']['token'];
+        unset($response['data']['token']);
+        $response['token'] = $token;
+        return $response;
+    }
 }
