@@ -14,6 +14,9 @@ class EmedController extends Controller
 
     public function init()
     {
+        remove_role('emed_admin');
+        remove_role('emed_register');
+        remove_role('emed_inst');
         add_role(
             'emed_admin',
             'emed_admin',
