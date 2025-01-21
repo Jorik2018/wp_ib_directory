@@ -234,8 +234,6 @@ class PregnantController extends Controller
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
     
-    
-    
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed,COUNT(v.id) AS visits FROM ds_gestante g ".
             "LEFT JOIN ds_gestante_visita v ON v.gestante_id=g.id 
             LEFT JOIN grupoipe_project.MAESTRO_RED r ON r.codigo_red=g.red

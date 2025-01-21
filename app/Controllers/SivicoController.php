@@ -64,9 +64,9 @@ class SivicoController extends Controller
         $to=$request['to'];
         if(!$to)$to=10000;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_project.MAESTRO_MICRORED d WHERE 1=1 "
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_microred d WHERE 1=1 "
             .($request->get_param('red')?"AND codigo_red=".$request->get_param('red'):"")." ORDER BY microred LIMIT ". $from.', '. $to,ARRAY_A );
-        if($wpdb->last_error )return new WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
+        if($wpdb->last_error )return new \WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
         foreach ($results as &$r){
             foreach ($r as $key => &$value){
@@ -87,7 +87,7 @@ class SivicoController extends Controller
         $to=$request['to'];
         if(!$to)$to=100000;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_wp980.drt_cie d WHERE 1=1 ".
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM drt_cie d WHERE 1=1 ".
         ($request->get_param('microred')?("AND Codigo_Cocadenado=".$request->get_param('microred')):"")." ORDER BY Descripcion_Item LIMIT ". $from.', '. $to, ARRAY_A  );
         if($wpdb->last_error )return t_error();
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
@@ -106,11 +106,18 @@ class SivicoController extends Controller
         $to=$request['to'];
         if(!$to)$to=10000;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred) AS microredCode,codigo_unico as code,Nombre_del_establecimiento AS name,ubigeo, CASE WHEN categoria IN ('I-4', 'II-1' ,'II-2') THEN 1 ELSE 0 END AS type,categoria FROM drt_renipress d WHERE 1=1 AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred) like '02%' ".
-        ($request->get_param('microred')?("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='".$request->get_param('microred'))."'":"")." ORDER BY  nombre_del_establecimiento LIMIT ". $from.', '. $to, ARRAY_A  );
+        //$results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred) AS microredCode,codigo_unico as code,Nombre_del_establecimiento AS name,ubigeo, CASE WHEN categoria IN ('I-4', 'II-1' ,'II-2') THEN 1 ELSE 0 END AS type,categoria FROM drt_renipress d WHERE 1=1 AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred) like '02%' ".
+        //($request->get_param('microred')?("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='".$request->get_param('microred'))."'":"")." ORDER BY  nombre_del_establecimiento LIMIT ". $from.', '. $to, ARRAY_A  );
+        
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS codigo_cocadenado AS microredCode,codigo_unico as code,Nombre_establecimiento AS name,ubigeo 
+        FROM grupoipe_regexa_ecr.ipress_eess d WHERE 1=1 ".
+        
+        
+        ($request->get_param('microred')?("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='".$request->get_param('microred'))."'":"")." ORDER BY  nombre_establecimiento LIMIT ". $from.', '. $to, ARRAY_A  );
         if($wpdb->last_error )return t_error();
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
         return $request['to']?array('data'=>$results,'size'=>$count):$results;
+
     }
     
     function api_sivico_search($request){
