@@ -104,7 +104,7 @@ class PayrollController extends Controller
         global $wpdb;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
         $employee=$o['employee'];
-        $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM drt_people WHERE id=" . $employee['id']), ARRAY_A);
+        $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=" . $employee['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         //date_default_timezone_set('America/New_York');
         $currentDate = new \DateTime();
