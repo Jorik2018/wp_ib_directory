@@ -103,14 +103,14 @@ class PayrollController extends Controller
     {
         global $wpdb;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
-        $employee=$o['employee'];
+        $employee = $o['employee'];
         $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=" . $employee['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         //date_default_timezone_set('America/New_York');
         $currentDate = new \DateTime();
         $formattedDate = $currentDate->format('d \D\e F Y');
         $formattedDate = strtoupper($formattedDate);
-  
+
         $mysqli = new \mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
         if ($mysqli->connect_error) {
             die("Error de conexión: " . $mysqli->connect_error);
@@ -135,7 +135,7 @@ class PayrollController extends Controller
                     }
                     // Inicializa datos para el nuevo año.
                     $year_data = [
-                        'fullName' => $people['names'].' '.$people['paternal_surname'].' '.$people['maternal_surname'],
+                        'fullName' => $people['names'] . ' ' . $people['paternal_surname'] . ' ' . $people['maternal_surname'],
                         'dependence' => 'DIRECCION REGIONAL DE SALUD ANCASH',
                         'subDependence' => 'ORDENOR CENTRO HUARAZ',
                         'position' => 'AUX. DE NUTRICION',
@@ -143,7 +143,7 @@ class PayrollController extends Controller
                         'ruc' => '20156003817',
                         'year' => $year,
                         'detail' => [],
-                        'date' => 'HUARAZ, '.$formattedDate
+                        'date' => 'HUARAZ, ' . $formattedDate
                     ];
                     $last_year = $year;
                     $last_concept = ""; // Resetea el concepto.
@@ -177,7 +177,73 @@ class PayrollController extends Controller
         }
 
         $mysqli->close();
-        return $data;
+
+
+
+
+        //return $data;
+
+        // Crear el archivo como contenido de un string
+        $fileContents = json_encode($data);
+        $externalApiUrl = 'http://web.regionancash.gob.pe/api/jreport/';
+        $filename = 'data.json'; // Nombre del archivo "virtual"
+        // Crear cuerpo en formato multipart/form-data
+        $boundary = wp_generate_password(24, false);
+        $body = "--$boundary\r\n";
+        $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"$filename\"\r\n";
+        $body .= "Content-Type: application/json\r\n\r\n";
+        $body .= $fileContents . "\r\n";
+        $body .= "--$boundary\r\n";
+        $body .= "Content-Disposition: form-data; name=\"filename\"\r\n\r\n";
+        $body .= $filename . "\r\n";
+        $body .= "--$boundary\r\n";
+        $body .= "Content-Disposition: form-data; name=\"template\"\r\n\r\n";
+        $body .= 'hc';
+        $body .= "\r\n--$boundary--";
+
+        // Configurar las cabeceras
+        $headers = [
+            "Authorization" => "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+            "Content-Type"  => "multipart/form-data; boundary=$boundary",
+            "Accept"        => "*/*",
+        ];
+
+        // Enviar solicitud usando wp_remote_post
+        $response = wp_remote_post($externalApiUrl, [
+            'body'    => $body,
+            'headers' => $headers,
+            'timeout' => 30, // Tiempo de espera ajustable
+        ]);
+
+        // Manejo de errores
+        if (is_wp_error($response)) {
+            return new \WP_REST_Response(['error' => 'Error conectando con la API externa'], 500);
+        }
+
+        // Devolver respuesta de la API externa
+        $responseHeaders = wp_remote_retrieve_headers($response);
+        $responseBody = wp_remote_retrieve_body($response);
+        $responseCode = wp_remote_retrieve_response_code($response);
+
+        if ($responseCode !== 200) {
+            return new \WP_REST_Response([
+                'error'  => 'Error en la API externa',
+                'status' => $responseCode,
+                'body'   => $responseBody,
+            ], 500);
+        }
+    
+        // Configurar las cabeceras para la descarga del binario
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="archivo.pdf"');
+        header('Content-Length: ' . strlen($responseBody));
+        /*foreach ($responseHeaders as $header => $value) {
+            header($header . ': ' . $value); // Agrega encabezados adicionales de la API externa si necesario
+        }*/
+    
+        // Imprimir el cuerpo de respuesta para iniciar la descarga
+        echo $responseBody;
+        exit;
     }
 
     function bulk($request)
