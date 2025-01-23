@@ -269,7 +269,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']),
 
                 // Asigna el monto al mes correspondiente.
                 if ($month >= 1 && $month <= 12) {
-                    $row[$month] = $amount;
+                    $row[$month] = number_format($amount, 2, '.', '');//$amount;
                 }
             }
 
