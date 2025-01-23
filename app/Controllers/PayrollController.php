@@ -89,9 +89,9 @@ class PayrollController extends Controller
             'methods' => 'GET',
             'callback' => array($this, 'pag')
         ));
-        register_rest_route('api/payroll', 'pregnant/visit/(?P<from>\d+)/(?P<to>\d+)', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'visit_pag')
+        register_rest_route('api/payroll', 'people', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'people')
         ));
         register_rest_route('api/payroll', 'chd', array(
             'methods' => 'POST',
@@ -99,6 +99,70 @@ class PayrollController extends Controller
         ));
     }
 
+    function people($request)
+    {
+        global $wpdb;
+        $original_db = $wpdb->dbname;
+        $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
+
+        $payrolls = $wpdb->get_results($wpdb->prepare("SELECT id,month FROM grupoipe_erp.rem_payroll WHERE year=" . $o['year']), ARRAY_A);
+        if ($wpdb->last_error) return t_error();
+        $payroll_map = [];
+        foreach ($payrolls as $payroll) {
+            $payroll_map[$payroll['month']] = $payroll['id'];
+        }
+        $items = $o['items'];
+        $sql = array();
+
+        $concept_map = [];
+        $wpdb->select('grupoipe_erp');
+        foreach ($items as $item) {
+            $item['concept'] = strtoupper($item['concept']);
+            $concept_key = $item['concept'] . '-' . $item['type'];
+            for ($i = 1; $i <= 12; $i++) {
+                $v = $item[$i];
+                if ($v) {
+                    $payroll_id = $payroll_map[$i];
+                    if (!$payroll_id) {
+                        $updated = $wpdb->insert('rem_payroll', array('year' => $o['year'], 'month' => $i));
+                        if (false === $updated) return t_error();
+                        $payroll_map[$i] = ($payroll_id = $wpdb->insert_id);
+                    }
+                    $concept_id = $concept_map[$concept_key];
+                    if (!$concept_id) {
+                        $c = $wpdb->get_row($wpdb->prepare("SELECT id,name,type_id FROM grupoipe_erp.rem_concept 
+                    WHERE name = %s AND type_id = %s LIMIT 1", $item['concept'], $item['type']), ARRAY_A);
+                        if ($wpdb->last_error) return t_error();
+                        if ($c) {
+                            $concept_map[$concept_key] = ($concept_id = $c['id']);
+                        } else {
+                            $updated = $wpdb->insert('rem_concept', array(
+                                'name' => $item['concept'],
+                                'type_id' => $item['type'],
+                                'abbreviation' => $item['concept']
+                            ));
+                            if (false === $updated) return t_error();
+                            $concept_map[$concept_key] = ($concept_id = $wpdb->insert_id);
+                        }
+                    }
+                    $payroll_concept = array(
+                        'payroll_id' => $payroll_id,
+                        'people_id' => $o['employee']['id'],
+                        'concept_id' => $concept_id,
+                        'type' => $item['type'],
+                        'amount' => $v,
+                        'concept' => $item['concept'],
+                        'concept_type_id' => $item['type']
+                    );
+                    $updated = $wpdb->insert('rem_payroll_concept', $payroll_concept);
+                    if (false === $updated) return t_error();
+                    $sql[] = $payroll_concept;
+                }
+            }
+        }
+        $wpdb->select($original_db);
+        return  $sql;
+    }
     function chd($request)
     {
         global $wpdb;
@@ -135,7 +199,7 @@ class PayrollController extends Controller
                     }
                     // Inicializa datos para el nuevo año.
                     $year_data = [
-                        'fullName' => $people['names'] . ' ' . $people['paternal_surname'] . ' ' . $people['maternal_surname'],
+                        'fullName' => $people['names'] . ' ' . $people['first_surname'] . ' ' . $people['last_surname'],
                         'dependence' => 'DIRECCION REGIONAL DE SALUD ANCASH',
                         'subDependence' => 'ORDENOR CENTRO HUARAZ',
                         'position' => 'AUX. DE NUTRICION',
@@ -232,7 +296,7 @@ class PayrollController extends Controller
                 'body'   => $responseBody,
             ], 500);
         }
-    
+
         // Configurar las cabeceras para la descarga del binario
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="archivo.pdf"');
@@ -240,7 +304,7 @@ class PayrollController extends Controller
         /*foreach ($responseHeaders as $header => $value) {
             header($header . ': ' . $value); // Agrega encabezados adicionales de la API externa si necesario
         }*/
-    
+
         // Imprimir el cuerpo de respuesta para iniciar la descarga
         echo $responseBody;
         exit;
