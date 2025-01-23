@@ -227,7 +227,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']),
         ." ORDER BY p.year, pc.concept_id";
         $last_concept = "";
         $last_year = "";
-        ini_set('serialize_precision', -1);
+        ini_set('serialize_precision', 14);
         if ($stmt = $mysqli->prepare($query)) {
             $stmt->execute();
             $stmt->store_result();
