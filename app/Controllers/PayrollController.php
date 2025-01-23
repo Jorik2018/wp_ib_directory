@@ -207,6 +207,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']),
         global $wpdb;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
         $employee = $o['employee'];
+        $year = isset($o['year'])?$o['year']:0;
         $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=" . $employee['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         //date_default_timezone_set('America/New_York');
@@ -219,7 +220,11 @@ ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']),
             die("Error de conexión: " . $mysqli->connect_error);
         }
         $data = [];
-        $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year FROM grupoipe_erp.rem_payroll_concept pc INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id WHERE pc.people_id=".$people['id']." ORDER BY p.year, pc.concept_id";
+        $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year FROM grupoipe_erp.rem_payroll_concept pc 
+        INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id 
+        WHERE pc.people_id=".$people['id'].
+        ($year>0?" AND p.year=".$year:"")
+        ." ORDER BY p.year, pc.concept_id";
         $last_concept = "";
         $last_year = "";
         if ($stmt = $mysqli->prepare($query)) {
