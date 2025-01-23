@@ -105,17 +105,56 @@ class PayrollController extends Controller
         $original_db = $wpdb->dbname;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
 
+
+        if (!isset($o['items'])) {
+            $data = $wpdb->get_results($wpdb->prepare("SELECT pc.concept,pc.amount,p.month,pc.concept_type_id 
+            FROM grupoipe_erp.rem_payroll_concept pc 
+INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id
+WHERE pc.people_id=%s and p.year=%s
+ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']), ARRAY_A);
+            if ($wpdb->last_error) return t_error();
+            
+            $aggregatedData = [];
+
+            foreach ($data as $row) {
+                $concept = $row["concept"];
+                $type = (int)$row["concept_type_id"];
+                $month = (int)$row["month"];
+                $amount = (float)$row["amount"];
+            
+                // Generar una clave única para el concepto y tipo
+                $key = $concept . ':' . $type;
+            
+                // Si no existe el concepto con este tipo, inicializa
+                if (!isset($aggregatedData[$key])) {
+                    $aggregatedData[$key] = [
+                        "concept" => $concept,
+                        "type" => $type
+                    ];
+                }
+            
+                // Agregar el monto al mes correspondiente, acumulando si ya existe
+                if (!isset($aggregatedData[$key][$month])) {
+                    $aggregatedData[$key][$month] = 0;
+                }
+                $aggregatedData[$key][$month] += $amount;
+            }
+            
+            // Convertir a una lista numérica y devolverla
+            return array_values($aggregatedData);
+        }
+        $wpdb->select('grupoipe_erp');
+        $items = $o['items'];
         $payrolls = $wpdb->get_results($wpdb->prepare("SELECT id,month FROM grupoipe_erp.rem_payroll WHERE year=" . $o['year']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         $payroll_map = [];
         foreach ($payrolls as $payroll) {
             $payroll_map[$payroll['month']] = $payroll['id'];
         }
-        $items = $o['items'];
         $sql = array();
 
         $concept_map = [];
-        $wpdb->select('grupoipe_erp');
+
         foreach ($items as $item) {
             $item['concept'] = strtoupper($item['concept']);
             $concept_key = $item['concept'] . '-' . $item['type'];
@@ -180,7 +219,7 @@ class PayrollController extends Controller
             die("Error de conexión: " . $mysqli->connect_error);
         }
         $data = [];
-        $query = "SELECT pc.concept,pc.amount,p.month,pc.id_tipomov,p.year FROM grupoipe_erp.rem_payroll_concept pc INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id ORDER BY p.year, pc.concept_id";
+        $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year FROM grupoipe_erp.rem_payroll_concept pc INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id WHERE pc.people_id=".$people['id']." ORDER BY p.year, pc.concept_id";
         $last_concept = "";
         $last_year = "";
         if ($stmt = $mysqli->prepare($query)) {
@@ -245,7 +284,7 @@ class PayrollController extends Controller
 
 
 
-        //return $data;
+        return $data;
 
         // Crear el archivo como contenido de un string
         $fileContents = json_encode($data);
