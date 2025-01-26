@@ -276,6 +276,14 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                         $year_data['detail'][] = $summary_row;
                     }
                     $summary_row = array_fill(0, 13, 0);
+                    if($id_tipomov==1){
+                        $summary_row[0]='INGRESOS';
+                    }else if($id_tipomov==2){
+                        $summary_row[0]='DESCUENTOS';
+                    }else if($id_tipomov==3){
+                        $summary_row[0]='APORTACIONES';
+                    }
+                    
                     $last_tipomov = $id_tipomov;
                 }
                 // Asigna el monto al mes correspondiente.
