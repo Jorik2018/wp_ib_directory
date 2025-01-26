@@ -113,7 +113,7 @@ INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id
 WHERE pc.people_id=%s and p.year=%s
 ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['year']), ARRAY_A);
             if ($wpdb->last_error) return t_error();
-            
+
             $aggregatedData = [];
 
             foreach ($data as $row) {
@@ -121,10 +121,10 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 $type = (int)$row["concept_type_id"];
                 $month = (int)$row["month"];
                 $amount = (float)$row["amount"];
-            
+
                 // Generar una clave única para el concepto y tipo
                 $key = $concept . ':' . $type;
-            
+
                 // Si no existe el concepto con este tipo, inicializa
                 if (!isset($aggregatedData[$key])) {
                     $aggregatedData[$key] = [
@@ -132,14 +132,14 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                         "type" => $type
                     ];
                 }
-            
+
                 // Agregar el monto al mes correspondiente, acumulando si ya existe
                 if (!isset($aggregatedData[$key][$month])) {
                     $aggregatedData[$key][$month] = 0;
                 }
                 $aggregatedData[$key][$month] += $amount;
             }
-            
+
             // Convertir a una lista numérica y devolverla
             return array_values($aggregatedData);
         }
@@ -207,7 +207,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         global $wpdb;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
         $employee = $o['employee'];
-        $year = isset($o['year'])?$o['year']:0;
+        $year = isset($o['year']) ? $o['year'] : 0;
         $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=" . $employee['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         //date_default_timezone_set('America/New_York');
@@ -223,11 +223,12 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year 
         FROM grupoipe_erp.rem_payroll_concept pc 
         INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id 
-        WHERE pc.people_id=".$people['id'].
-        ($year>0?" AND p.year=".$year:"")
-        ." ORDER BY p.year,pc.concept_type_id, pc.concept_id DESC";
+        WHERE pc.people_id=" . $people['id'] .
+            ($year > 0 ? " AND p.year=" . $year : "")
+            . " ORDER BY p.year,pc.concept_type_id, pc.concept_id DESC";
         $last_concept = "";
         $last_year = "";
+        $last_tipomov = 0;
         ini_set('serialize_precision', 14);
         if ($stmt = $mysqli->prepare($query)) {
             $stmt->execute();
@@ -235,9 +236,11 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
             $stmt->bind_result($concept, $amount, $month, $id_tipomov, $year);
 
             $row = [];
+            $summary_row = [];
             while ($stmt->fetch()) {
                 // Si cambia el año, guarda los datos anteriores en el arreglo principal.
                 if ($last_year != $year) {
+                    $last_tipomov = 0;
                     if ($last_year != "") {
                         // Agrega el último concepto al detalle del año anterior.
                         $year_data['detail'][] = $row;
@@ -258,7 +261,13 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     $last_year = $year;
                     $last_concept = ""; // Resetea el concepto.
                 }
-
+                if ($last_tipomov  != $id_tipomov) {
+                    if ($last_tipomov != null) {
+                        $year_data['detail'][] = $summary_row;
+                    }
+                    $summary_row = array_fill(0, 13, 0);
+                    $last_tipomov = $id_tipomov;
+                }
                 // Si cambia el concepto, guarda el concepto anterior y empieza uno nuevo.
                 if ($last_concept != $concept) {
                     if ($last_concept != "") {
@@ -271,13 +280,17 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
 
                 // Asigna el monto al mes correspondiente.
                 if ($month >= 1 && $month <= 12) {
-                    $row[$month] = number_format($amount, 2, '.', '');//$amount;
+                    $row[$month] = number_format($amount, 2, '.', ''); //$amount;
+                    $summary_row[$month] += $amount;
                 }
             }
 
             // Agrega los datos restantes del último concepto y año.
             if (!empty($row)) {
                 $year_data['detail'][] = $row;
+            }
+            if (!empty($summary_row)) {
+                $year_data['detail'][] = $summary_row;
             }
             if (!empty($year_data)) {
                 $data[] = $year_data;
