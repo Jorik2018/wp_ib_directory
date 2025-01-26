@@ -273,6 +273,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 }
                 if ($last_tipomov  != $id_tipomov) {
                     if ($last_tipomov != null) {
+                        $this->replaceZerosWithNull($summary_row);
                         $year_data['detail'][] = $summary_row;
                     }
                     $summary_row = array_fill(0, 15, 0);
@@ -304,6 +305,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 $year_data['detail'][] = $row;
             }
             if (!empty($summary_row)) {
+                $this->replaceZerosWithNull($summary_row);
                 $year_data['detail'][] = $summary_row;
             }
             if (!empty($year_data)) {
@@ -381,6 +383,14 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         // Imprimir el cuerpo de respuesta para iniciar la descarga
         echo $responseBody;
         exit;
+    }
+
+    function replaceZerosWithNull(&$row) {
+        foreach ($row as $key => $value) {
+            if ($value === 0) {
+                $row[$key] = null;
+            }
+        }
     }
 
     function bulk($request)
