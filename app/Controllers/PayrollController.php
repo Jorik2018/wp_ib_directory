@@ -251,20 +251,22 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
             $data = [];
             $summary_totals = array_fill(1, 12, 0); // Totales por mes para un `id_tipomov`.
         
-            $last_year = "";
+            $last_year = null;
             $last_id_tipomov = null;
-            $last_concept = "";
+            $last_concept = null;
         
             while ($stmt->fetch()) {
                 // Cambio de año
-                if ($last_year != $year) {
-                    if ($last_year !== "") {
-                        // Agrega el último resumen del grupo actual antes de cambiar de año.
-                        if (!empty($summary_totals)) {
-                            $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
-                        }
-                        $data[] = $year_data; // Agrega los datos del año completo.
+                if ($last_year !== null && $last_year != $year) {
+                    if (!empty($row)) {
+                        $year_data['detail'][] = $row; // Agrega la última fila de concepto.
+                        $row = [];
                     }
+                    if (!empty($summary_totals)) {
+                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
+                        $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
+                    }
+                    $data[] = $year_data; // Agrega datos del año procesado.
         
                     // Inicializa datos para el nuevo año.
                     $year_data = [
@@ -280,44 +282,47 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     ];
                     $last_year = $year;
                     $last_id_tipomov = null;
-                    $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
                 }
         
-                // Cambio de grupo (`id_tipomov`).
+                // Cambio de grupo `id_tipomov`.
                 if ($last_id_tipomov !== null && $last_id_tipomov != $id_tipomov) {
-                    // Agrega resumen del grupo actual (sin duplicar la última fila).
-                    if (!empty($summary_totals)) {
-                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "TT por Tipo de Movimiento", $last_id_tipomov);
+                    if (!empty($row)) {
+                        $year_data['detail'][] = $row; // Agrega la última fila de concepto.
+                        $row = [];
                     }
-                    $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
+                    if (!empty($summary_totals)) {
+                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "T3 por Tipo de Movimiento", $last_id_tipomov);
+                        $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
+                    }
                 }
         
                 $last_id_tipomov = $id_tipomov; // Actualiza el grupo actual.
         
                 // Cambio de concepto
-                if ($last_concept !== $concept) {
-                    if ($last_concept !== "") {
-                        $year_data['detail'][] = $row; // Agrega la fila del concepto anterior.
+                if ($last_concept !== null && $last_concept != $concept) {
+                    if (!empty($row)) {
+                        $year_data['detail'][] = $row; // Agrega la última fila de concepto.
+                        $row = [];
                     }
-                    $row = array_fill(0, 14, null); // Inicializa fila de concepto.
-                    $row[0] = $concept; // Asigna el concepto a la columna 0.
-                    $row[13] = $id_tipomov; // Asigna el `id_tipomov`.
-                    $last_concept = $concept;
                 }
         
-                // Actualiza los valores por mes y los totales.
+                $row[0] = $concept; // Asigna el concepto.
+                $row[13] = $id_tipomov; // ID Tipo de Movimiento.
+                $last_concept = $concept;
+        
+                // Suma los valores mensuales.
                 if ($month >= 1 && $month <= 12) {
                     $row[$month] = number_format($amount, 2, '.', '');
-                    $summary_totals[$month] += $amount; // Suma al resumen por mes.
+                    $summary_totals[$month] += $amount; // Suma al total del mes.
                 }
             }
         
-            // Procesar el último grupo y el año.
+            // Procesar los últimos datos después del bucle.
             if (!empty($row)) {
                 $year_data['detail'][] = $row;
             }
             if (!empty($summary_totals)) {
-                $year_data['detail'][] = $this->createSummaryRow($summary_totals, "TT por Tipo de Movimiento", $last_id_tipomov);
+                $year_data['detail'][] = $this->createSummaryRow($summary_totals, "T2 por Tipo de Movimiento", $last_id_tipomov);
             }
             if (!empty($year_data)) {
                 $data[] = $year_data;
