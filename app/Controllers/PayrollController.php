@@ -255,8 +255,10 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 if ($last_year != $year) {
                     if ($last_year != "") {
                         // Agrega los totales del último grupo de `id_tipomov`.
+                        if (!empty($row)) {
+                            $year_data['detail'][] = $row; // Agrega la última fila del grupo actual.
+                        }
                         $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
-        
                         $data[] = $year_data;
                     }
         
@@ -278,7 +280,10 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         
                 // Cambio de grupo `id_tipomov`.
                 if ($last_id_tipomov !== null && $last_id_tipomov != $id_tipomov) {
-                    $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
+                    if (!empty($row)) {
+                        $year_data['detail'][] = $row; // Agrega la última fila del grupo actual antes del resumen.
+                    }
+                    $year_data['detail'][] = $this-> createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
                     $summary_totals = array_fill(1, 12, 0); // Reinicia los totales para el nuevo grupo.
                 }
         
