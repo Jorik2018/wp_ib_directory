@@ -261,13 +261,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     $last_year = $year;
                     $last_concept = ""; // Resetea el concepto.
                 }
-                if ($last_tipomov  != $id_tipomov) {
-                    if ($last_tipomov != null) {
-                        $year_data['detail'][] = $summary_row;
-                    }
-                    $summary_row = array_fill(0, 13, 0);
-                    $last_tipomov = $id_tipomov;
-                }
+                
                 // Si cambia el concepto, guarda el concepto anterior y empieza uno nuevo.
                 if ($last_concept != $concept) {
                     if ($last_concept != "") {
@@ -277,7 +271,13 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     $row[0] = $concept; // Coloca el concepto en la primera posición.
                     $last_concept = $concept;
                 }
-
+                if ($last_tipomov  != $id_tipomov) {
+                    if ($last_tipomov != null) {
+                        $year_data['detail'][] = $summary_row;
+                    }
+                    $summary_row = array_fill(0, 13, 0);
+                    $last_tipomov = $id_tipomov;
+                }
                 // Asigna el monto al mes correspondiente.
                 if ($month >= 1 && $month <= 12) {
                     $row[$month] = number_format($amount, 2, '.', ''); //$amount;
