@@ -111,7 +111,7 @@ class PayrollController extends Controller
             FROM grupoipe_erp.rem_payroll_concept pc 
 INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id
 WHERE pc.people_id=%s and p.year=%s
-ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']), ARRAY_A);
+ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['year']), ARRAY_A);
             if ($wpdb->last_error) return t_error();
             
             $aggregatedData = [];
@@ -224,7 +224,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id", $o['employee']['id'], $o['year']),
         INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id 
         WHERE pc.people_id=".$people['id'].
         ($year>0?" AND p.year=".$year:"")
-        ." ORDER BY p.year, pc.concept_id";
+        ." ORDER BY p.year,pc.concept_type_id, pc.concept_id DESC";
         $last_concept = "";
         $last_year = "";
         ini_set('serialize_precision', 14);
