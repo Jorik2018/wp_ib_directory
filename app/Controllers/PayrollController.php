@@ -202,17 +202,6 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         $wpdb->select($original_db);
         return  $sql;
     }
-
-    function createSummaryRow($totals, $concept, $id_tipomov) {
-        $row = array_fill(0, 14, null);
-        $row[0] = $concept; // Texto descriptivo del resumen.
-        $row[13] = $id_tipomov; // ID del tipo de movimiento.
-    
-        foreach ($totals as $month => $total) {
-            $row[$month] = number_format($total, 2, '.', '');
-        }
-        return $row;
-    }
     function chd($request)
     {
         global $wpdb;
@@ -239,35 +228,21 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         ." ORDER BY p.year,pc.concept_type_id, pc.concept_id DESC";
         $last_concept = "";
         $last_year = "";
-        $last_id_tipomov = null;
         ini_set('serialize_precision', 14);
         if ($stmt = $mysqli->prepare($query)) {
             $stmt->execute();
             $stmt->store_result();
             $stmt->bind_result($concept, $amount, $month, $id_tipomov, $year);
-        
+
             $row = [];
-            $year_data = [];
-            $data = [];
-            $summary_totals = array_fill(1, 12, 0); // Totales por mes para un `id_tipomov`.
-        
-            $last_year = null;
-            $last_id_tipomov = null;
-            $last_concept = null;
-        
             while ($stmt->fetch()) {
-                // Cambio de año
-                if ($last_year !== null && $last_year != $year) {
-                    if (!empty($row)) {
-                        $year_data['detail'][] = $row; // Agrega la última fila de concepto.
-                        $row = [];
+                // Si cambia el año, guarda los datos anteriores en el arreglo principal.
+                if ($last_year != $year) {
+                    if ($last_year != "") {
+                        // Agrega el último concepto al detalle del año anterior.
+                        $year_data['detail'][] = $row;
+                        $data[] = $year_data; // Agrega el bloque completo del año al resultado.
                     }
-                    if (!empty($summary_totals)) {
-                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
-                        $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
-                    }
-                    $data[] = $year_data; // Agrega datos del año procesado.
-        
                     // Inicializa datos para el nuevo año.
                     $year_data = [
                         'fullName' => $people['names'] . ' ' . $people['first_surname'] . ' ' . $people['last_surname'],
@@ -278,59 +253,39 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                         'ruc' => '20156003817',
                         'year' => $year,
                         'detail' => [],
-                        'date' => 'HUARAZ, ' . $formattedDate,
+                        'date' => 'HUARAZ, ' . $formattedDate
                     ];
                     $last_year = $year;
-                    $last_id_tipomov = null;
+                    $last_concept = ""; // Resetea el concepto.
                 }
-        
-                // Cambio de grupo `id_tipomov`.
-                if ($last_id_tipomov !== null && $last_id_tipomov != $id_tipomov) {
-                    if (!empty($row)) {
-                        $year_data['detail'][] = $row; // Agrega la última fila de concepto.
-                        $row = [];
+
+                // Si cambia el concepto, guarda el concepto anterior y empieza uno nuevo.
+                if ($last_concept != $concept) {
+                    if ($last_concept != "") {
+                        $year_data['detail'][] = $row; // Agrega el concepto anterior al detalle.
                     }
-                    if (!empty($summary_totals)) {
-                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
-                        $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
-                    }
+                    $row = array_fill(0, 13, null); // Inicializa un nuevo concepto con índices de 0 a 12.
+                    $row[0] = $concept; // Coloca el concepto en la primera posición.
+                    $last_concept = $concept;
                 }
-        
-                $last_id_tipomov = $id_tipomov; // Actualiza el grupo actual.
-        
-                // Cambio de concepto
-                if ($last_concept !== null && $last_concept != $concept) {
-                    if (!empty($row)) {
-                        $year_data['detail'][] = $row; // Agrega la última fila de concepto.
-                        $row = [];
-                    }
-                }
-        
-                $row[0] = $concept; // Asigna el concepto.
-                $row[13] = $id_tipomov; // ID Tipo de Movimiento.
-                $last_concept = $concept;
-        
-                // Suma los valores mensuales.
+
+                // Asigna el monto al mes correspondiente.
                 if ($month >= 1 && $month <= 12) {
-                    $row[$month] = number_format($amount, 2, '.', '');
-                    $summary_totals[$month] += $amount; // Suma al total del mes.
+                    $row[$month] = number_format($amount, 2, '.', '');//$amount;
                 }
             }
-        
-            // Procesar los últimos datos después del bucle.
+
+            // Agrega los datos restantes del último concepto y año.
             if (!empty($row)) {
                 $year_data['detail'][] = $row;
-            }
-            if (!empty($summary_totals)) {
-                $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
             }
             if (!empty($year_data)) {
                 $data[] = $year_data;
             }
-        
+
             $stmt->close();
         }
-        
+
         $mysqli->close();
 
 
