@@ -254,11 +254,12 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 // Cambio de año
                 if ($last_year != $year) {
                     if ($last_year != "") {
-                        // Agrega los totales del último grupo de `id_tipomov`.
                         if (!empty($row)) {
-                            $year_data['detail'][] = $row; // Agrega la última fila del grupo actual.
+                            $year_data['detail'][] = $row; // Agrega la última fila del último grupo.
                         }
-                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
+                        if (!empty($summary_totals)) {
+                            $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
+                        }
                         $data[] = $year_data;
                     }
         
@@ -281,9 +282,11 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 // Cambio de grupo `id_tipomov`.
                 if ($last_id_tipomov !== null && $last_id_tipomov != $id_tipomov) {
                     if (!empty($row)) {
-                        $year_data['detail'][] = $row; // Agrega la última fila del grupo actual antes del resumen.
+                        $year_data['detail'][] = $row; // Agrega la última fila del grupo actual.
                     }
-                    $year_data['detail'][] = $this-> createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
+                    if (!empty($summary_totals)) {
+                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
+                    }
                     $summary_totals = array_fill(1, 12, 0); // Reinicia los totales para el nuevo grupo.
                 }
         
@@ -292,7 +295,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 // Cambio de concepto
                 if ($last_concept != $concept) {
                     if ($last_concept != "") {
-                        $year_data['detail'][] = $row;
+                        $year_data['detail'][] = $row; // Agrega la fila del concepto anterior.
                     }
                     $row = array_fill(0, 14, null); // Inicializa nuevo concepto.
                     $row[0] = $concept; // Asigna concepto en la columna 0.
@@ -309,7 +312,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         
             // Agrega los datos restantes del último concepto, grupo y año.
             if (!empty($row)) {
-                $year_data['detail'][] = $row;
+                $year_data['detail'][] = $row; // Última fila del último concepto.
             }
             if (!empty($summary_totals)) {
                 $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
@@ -320,6 +323,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         
             $stmt->close();
         }
+        
         $mysqli->close();
 
 
