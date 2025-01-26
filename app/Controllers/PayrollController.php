@@ -259,14 +259,11 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 // Cambio de año
                 if ($last_year != $year) {
                     if ($last_year !== "") {
-                        // Agrega el último grupo y su resumen.
-                        if (!empty($row)) {
-                            $year_data['detail'][] = $row;
-                        }
+                        // Agrega el último resumen del grupo actual antes de cambiar de año.
                         if (!empty($summary_totals)) {
                             $year_data['detail'][] = $this->createSummaryRow($summary_totals, "Total por Tipo de Movimiento", $last_id_tipomov);
                         }
-                        $data[] = $year_data; // Agrega el año completo al dataset.
+                        $data[] = $year_data; // Agrega los datos del año completo.
                     }
         
                     // Inicializa datos para el nuevo año.
@@ -288,12 +285,9 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         
                 // Cambio de grupo (`id_tipomov`).
                 if ($last_id_tipomov !== null && $last_id_tipomov != $id_tipomov) {
-                    // Agrega los datos del grupo actual y su resumen.
-                    if (!empty($row)) {
-                        $year_data['detail'][] = $row; // Última fila del grupo actual.
-                    }
+                    // Agrega resumen del grupo actual (sin duplicar la última fila).
                     if (!empty($summary_totals)) {
-                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "T Tipo de Movimiento", $last_id_tipomov);
+                        $year_data['detail'][] = $this->createSummaryRow($summary_totals, "TT por Tipo de Movimiento", $last_id_tipomov);
                     }
                     $summary_totals = array_fill(1, 12, 0); // Reinicia totales.
                 }
@@ -323,7 +317,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                 $year_data['detail'][] = $row;
             }
             if (!empty($summary_totals)) {
-                $year_data['detail'][] = $this->createSummaryRow($summary_totals, "T por Tipo de Movimiento", $last_id_tipomov);
+                $year_data['detail'][] = $this->createSummaryRow($summary_totals, "TT por Tipo de Movimiento", $last_id_tipomov);
             }
             if (!empty($year_data)) {
                 $data[] = $year_data;
