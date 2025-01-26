@@ -267,7 +267,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     if ($last_concept != "") {
                         $year_data['detail'][] = $row; // Agrega el concepto anterior al detalle.
                     }
-                    $row = array_fill(0, 13, null); // Inicializa un nuevo concepto con índices de 0 a 12.
+                    $row = array_fill(0, 14, null); // Inicializa un nuevo concepto con índices de 0 a 12.
                     $row[0] = $concept; // Coloca el concepto en la primera posición.
                     $last_concept = $concept;
                 }
@@ -275,13 +275,19 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     if ($last_tipomov != null) {
                         $year_data['detail'][] = $summary_row;
                     }
-                    $summary_row = array_fill(0, 13, 0);
-                    if($id_tipomov==1){
+                    $summary_row = array_fill(0, 15, 0);
+                    if($id_tipomov==1||$id_tipomov==4){
                         $summary_row[0]='INGRESOS';
-                    }else if($id_tipomov==2){
+                        $summary_row[13]=$id_tipomov;
+                        $summary_row[14]=2;
+                    }else if($id_tipomov==2||$id_tipomov==5){
                         $summary_row[0]='DESCUENTOS';
-                    }else if($id_tipomov==3){
+                        $summary_row[13]=$id_tipomov;
+                        $summary_row[14]=2;
+                    }else if($id_tipomov==3||$id_tipomov==6){
                         $summary_row[0]='APORTACIONES';
+                        $summary_row[13]=$id_tipomov;
+                        $summary_row[14]=2;
                     }
                     
                     $last_tipomov = $id_tipomov;
