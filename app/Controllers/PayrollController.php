@@ -104,14 +104,13 @@ class PayrollController extends Controller
         global $wpdb;
         $original_db = $wpdb->dbname;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
-
-
+        $employee=$o['employee'];
         if (!isset($o['items'])) {
             $data = $wpdb->get_results($wpdb->prepare("SELECT pc.concept,pc.amount,p.month,pc.concept_type_id 
             FROM grupoipe_erp.rem_payroll_concept pc 
 INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id
-WHERE pc.people_id=%s and p.year=%s
-ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['year']), ARRAY_A);
+WHERE pc.people_id=%s and p.year=%d
+ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']), ARRAY_A);
             if ($wpdb->last_error) return t_error();
 
             $aggregatedData = [];
@@ -186,7 +185,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                     }
                     $payroll_concept = array(
                         'payroll_id' => $payroll_id,
-                        'people_id' => $o['employee']['id'],
+                        'people_id' => $employee['id'],
                         'concept_id' => $concept_id,
                         'type' => $item['type'],
                         'amount' => $v,
@@ -208,7 +207,10 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
         $employee = $o['employee'];
         $year = isset($o['year']) ? $o['year'] : 0;
-        $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=" . $employee['id']), ARRAY_A);
+        $employee = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.hr_employee WHERE id=%d", $employee['id']), ARRAY_A);
+        if ($wpdb->last_error) return t_error();
+        $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=%d", $employee['people_id']), ARRAY_A);
+        $people['ruc'] = $employee['ruc'];
         if ($wpdb->last_error) return t_error();
         //date_default_timezone_set('America/New_York');
         $currentDate = new \DateTime();
@@ -223,7 +225,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year 
         FROM grupoipe_erp.rem_payroll_concept pc 
         INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id 
-        WHERE pc.people_id=" . $people['id'] .
+        WHERE pc.people_id=" . $employee['id'] .
             ($year > 0 ? " AND p.year=" . $year : "")
             . " ORDER BY p.year,pc.concept_type_id, pc.concept_id DESC";
         $last_concept = "";
@@ -254,14 +256,14 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                         'position' => 'AUX. DE NUTRICION',
                         'code' => $people['code'],
                         'ruc' => '20156003817',
-                        'year' => $year,
+                        'year' => $people['ruc'],
                         'detail' => [],
                         'date' => 'HUARAZ, ' . $formattedDate
                     ];
                     $last_year = $year;
                     $last_concept = ""; // Resetea el concepto.
                 }
-                
+
                 // Si cambia el concepto, guarda el concepto anterior y empieza uno nuevo.
                 if ($last_concept != $concept) {
                     if ($last_concept != "") {
@@ -277,20 +279,20 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
                         $year_data['detail'][] = $summary_row;
                     }
                     $summary_row = array_fill(0, 15, 0);
-                    if($id_tipomov==1||$id_tipomov==4){
-                        $summary_row[0]='INGRESOS';
-                        $summary_row[13]=$id_tipomov;
-                        $summary_row[14]=2;
-                    }else if($id_tipomov==2||$id_tipomov==5){
-                        $summary_row[0]='DESCUENTOS';
-                        $summary_row[13]=$id_tipomov;
-                        $summary_row[14]=2;
-                    }else if($id_tipomov==3||$id_tipomov==6){
-                        $summary_row[0]='APORTACIONES';
-                        $summary_row[13]=$id_tipomov;
-                        $summary_row[14]=2;
+                    if ($id_tipomov == 1 || $id_tipomov == 4) {
+                        $summary_row[0] = 'INGRESOS';
+                        $summary_row[13] = $id_tipomov;
+                        $summary_row[14] = 2;
+                    } else if ($id_tipomov == 2 || $id_tipomov == 5) {
+                        $summary_row[0] = 'DESCUENTOS';
+                        $summary_row[13] = $id_tipomov;
+                        $summary_row[14] = 2;
+                    } else if ($id_tipomov == 3 || $id_tipomov == 6) {
+                        $summary_row[0] = 'APORTACIONES';
+                        $summary_row[13] = $id_tipomov;
+                        $summary_row[14] = 2;
                     }
-                    
+
                     $last_tipomov = $id_tipomov;
                 }
                 // Asigna el monto al mes correspondiente.
@@ -385,7 +387,8 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $o['employee']['id'], $o['yea
         exit;
     }
 
-    function replaceZerosWithNull(&$row) {
+    function replaceZerosWithNull(&$row)
+    {
         foreach ($row as $key => $value) {
             if ($value === 0) {
                 $row[$key] = null;
