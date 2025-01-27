@@ -255,8 +255,8 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
                         'subDependence' => 'ORDENOR CENTRO HUARAZ',
                         'position' => 'AUX. DE NUTRICION',
                         'code' => $people['code'],
-                        'ruc' => '20156003817',
-                        'year' => $people['ruc'],
+                        'ruc' => $people['ruc'],
+                        'year' => $year,
                         'detail' => [],
                         'date' => 'HUARAZ, ' . $formattedDate
                     ];
