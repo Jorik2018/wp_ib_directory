@@ -104,7 +104,7 @@ class PayrollController extends Controller
         global $wpdb;
         $original_db = $wpdb->dbname;
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
-        $employee=$o['employee'];
+        $employee = $o['employee'];
         if (!isset($o['items'])) {
             $data = $wpdb->get_results($wpdb->prepare("SELECT pc.concept,pc.amount,p.month,pc.concept_type_id 
             FROM grupoipe_erp.rem_payroll_concept pc 
@@ -201,6 +201,24 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
         $wpdb->select($original_db);
         return  $sql;
     }
+
+    function findLastExperienceBeforeYear($experiences, $año)
+    {
+        $referenceDate = strtotime("$año-12-31");
+        $lastExperience = null;
+        foreach ($experiences as $experience) {
+            $experienceTimestamp = strtotime($experience['start_date']);
+            // Check if the experience date is before the reference date
+            if ($experienceTimestamp < $referenceDate) {
+                // Update lastExperience if it's the most recent one found
+                if (!$lastExperience || $experienceTimestamp > strtotime($lastExperience['start_date'])) {
+                    $lastExperience = $experience;
+                }
+            }
+        }
+        return $lastExperience; // Return the last experience found
+    }
+
     function chd($request)
     {
         global $wpdb;
@@ -212,6 +230,10 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
         $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=%d", $employee['people_id']), ARRAY_A);
         $people['ruc'] = $employee['ruc'];
         if ($wpdb->last_error) return t_error();
+
+        $experiences = $wpdb->get_results($wpdb->prepare("SELECT * FROM grupoipe_erp.hr_experience WHERE employee_id=%d", $employee['id']), ARRAY_A);
+        if ($wpdb->last_error) return t_error();
+
         //date_default_timezone_set('America/New_York');
         $currentDate = new \DateTime();
         $formattedDate = $currentDate->format('d \D\e F Y');
@@ -249,11 +271,19 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
                         $data[] = $year_data; // Agrega el bloque completo del año al resultado.
                     }
                     // Inicializa datos para el nuevo año.
+
+
+
+                    //Buscar la experiencia q esta fecha ini antes del año actual del 
+                    $experience = $this->findLastExperienceBeforeYear($experiences, $year);
+                    if ($experience === null) {
+                        $experience = array('position' => '---', 'dependency' => '---');
+                    }
                     $year_data = [
                         'fullName' => $people['names'] . ' ' . $people['first_surname'] . ' ' . $people['last_surname'],
                         'dependence' => 'DIRECCION REGIONAL DE SALUD ANCASH',
-                        'subDependence' => 'ORDENOR CENTRO HUARAZ',
-                        'position' => 'AUX. DE NUTRICION',
+                        'subDependence' => $experience['dependency'],
+                        'position' => $experience['position'],
                         'code' => $people['code'],
                         'ruc' => $people['ruc'],
                         'year' => $year,
@@ -261,7 +291,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
                         'date' => 'HUARAZ, ' . $formattedDate
                     ];
                     $last_year = $year;
-                    $last_concept = ""; // Resetea el concepto.
+                    $last_concept = "";
                 }
 
                 // Si cambia el concepto, guarda el concepto anterior y empieza uno nuevo.
