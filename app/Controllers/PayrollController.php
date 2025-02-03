@@ -282,6 +282,7 @@ class PayrollController extends Controller
 
             $row = [];
             $summary_row = [];
+            $last_ingresos = array_fill(0, 15, 0);
             while ($stmt->fetch()) {
                 // Si cambia el año, guarda los datos anteriores en el arreglo principal.
                 if ($last_year != $year) {
@@ -328,12 +329,23 @@ class PayrollController extends Controller
                     if ($last_tipomov != null) {
                         $this->replaceZerosWithNull($summary_row);
                         $year_data['detail'][] = $summary_row;
+                        //aqui deberia agregarse la diferencia de sumary INGRESOS - DESCUENTOS
+                        if ($summary_row[0] === 'DESCUENTOS') {
+                            $difference_row = array_fill(0, 15, 0);
+                            $difference_row[0] = 'TOTAL PAGO';
+                            for ($i = 1; $i <= 12; $i++) {
+                                $difference_row[$i] = ($last_ingresos[$i] ?? 0) - ($summary_row[$i] ?? 0);
+                            }
+                            $this->replaceZerosWithNull($difference_row);
+                            $year_data['detail'][] = $difference_row;
+                        }
                     }
                     $summary_row = array_fill(0, 15, 0);
                     if ($id_tipomov == 1 || $id_tipomov == 4) {
                         $summary_row[0] = 'INGRESOS';
                         $summary_row[13] = $id_tipomov;
                         $summary_row[14] = 2;
+                        $last_ingresos = $summary_row;
                     } else if ($id_tipomov == 2 || $id_tipomov == 5) {
                         $summary_row[0] = 'DESCUENTOS';
                         $summary_row[13] = $id_tipomov;
@@ -360,6 +372,16 @@ class PayrollController extends Controller
             if (!empty($summary_row)) {
                 $this->replaceZerosWithNull($summary_row);
                 $year_data['detail'][] = $summary_row;
+                //aqui deberia agregarse la diferencia de sumary INGRESOS - DESCUENTOS
+                if ($summary_row[0] === 'DESCUENTOS') {
+                    $difference_row = array_fill(0, 15, 0);
+                    $difference_row[0] = 'TOTAL PAGO';
+                    for ($i = 1; $i <= 12; $i++) {
+                        $difference_row[$i] = ($last_ingresos[$i] ?? 0) - ($summary_row[$i] ?? 0);
+                    }
+                    $this->replaceZerosWithNull($difference_row);
+                    $year_data['detail'][] = $difference_row;
+                }
             }
             if (!empty($year_data)) {
                 $data[] = $year_data;
