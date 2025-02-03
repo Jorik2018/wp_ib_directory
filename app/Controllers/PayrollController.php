@@ -263,7 +263,7 @@ class PayrollController extends Controller
             die("Error de conexión: " . $mysqli->connect_error);
         }
         $data = [];
-
+        $map=[];
         $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year 
         FROM grupoipe_erp.rem_payroll_concept pc 
         INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id 
@@ -279,30 +279,27 @@ class PayrollController extends Controller
             $stmt->execute();
             $stmt->store_result();
             $stmt->bind_result($concept, $amount, $month, $id_tipomov, $year);
-
+        
+            $data = [];
+            $last_year = null;
+            $last_concept = null;
+            $last_tipomov = null;
+            $map = ['INGRESOS' => array_fill(0, 15, 0), 'DESCUENTOS' => array_fill(0, 15, 0)];
+            $year_data = [];
             $row = [];
             $summary_row = [];
-            $last_ingresos = array_fill(0, 15, 0);
+        
             while ($stmt->fetch()) {
-                // Si cambia el año, guarda los datos anteriores en el arreglo principal.
-                if ($last_year != $year) {
-                    $last_tipomov = 0;
-                    if ($last_year != "") {
-                        // Agrega el último concepto al detalle del año anterior.
+                if ($last_year !== $year) {
+                    if ($last_year !== null) {
                         $year_data['detail'][] = $row;
-                        $data[] = $year_data; // Agrega el bloque completo del año al resultado.
+                        $data[] = $year_data;
                     }
-                    // Inicializa datos para el nuevo año.
-
-
-
-                    //Buscar la experiencia q esta fecha ini antes del año actual del 
-                    $experience = $this->findLastExperienceBeforeYear($experiences, $year);
-                    if ($experience === null) {
-                        $experience = array('position' => '---', 'dependency' => '---');
-                    }
+        
+                    $experience = $this->findLastExperienceBeforeYear($experiences, $year) ?? ['position' => '---', 'dependency' => '---'];
+        
                     $year_data = [
-                        'fullName' => $people['names'] . ' ' . $people['first_surname'] . ' ' . $people['last_surname'],
+                        'fullName' => "{$people['names']} {$people['first_surname']} {$people['last_surname']}",
                         'dependence' => 'DIRECCION REGIONAL DE SALUD ANCASH',
                         'subDependence' => $experience['dependency'],
                         'position' => $experience['position'],
@@ -310,86 +307,92 @@ class PayrollController extends Controller
                         'ruc' => $people['ruc'],
                         'year' => $year,
                         'detail' => [],
-                        'date' => 'HUARAZ, ' . $formattedDate
+                        'date' => "HUARAZ, $formattedDate"
                     ];
                     $last_year = $year;
-                    $last_concept = "";
+                    $last_concept = null;
+                    $last_tipomov = null;
                 }
-
-                // Si cambia el concepto, guarda el concepto anterior y empieza uno nuevo.
-                if ($last_concept != $concept) {
-                    if ($last_concept != "") {
-                        $year_data['detail'][] = $row; // Agrega el concepto anterior al detalle.
+        
+                if ($last_concept !== $concept) {
+                    if ($last_concept !== null) {
+                        $year_data['detail'][] = $row;
                     }
-                    $row = array_fill(0, 14, null); // Inicializa un nuevo concepto con índices de 0 a 12.
-                    $row[0] = $concept; // Coloca el concepto en la primera posición.
+                    $row = array_fill(0, 14, null);
+                    $row[0] = $concept;
                     $last_concept = $concept;
                 }
-                if ($last_tipomov  != $id_tipomov) {
-                    if ($last_tipomov != null) {
+        
+                if ($last_tipomov !== $id_tipomov) {
+                    if ($last_tipomov !== null) {
                         $this->replaceZerosWithNull($summary_row);
                         $year_data['detail'][] = $summary_row;
-                        //aqui deberia agregarse la diferencia de sumary INGRESOS - DESCUENTOS
+        
                         if ($summary_row[0] === 'DESCUENTOS') {
                             $difference_row = array_fill(0, 15, 0);
                             $difference_row[0] = 'TOTAL PAGO';
+                            $difference_row[14] = 2;
                             for ($i = 1; $i <= 12; $i++) {
-                                $difference_row[$i] = ($last_ingresos[$i] ?? 0) - ($summary_row[$i] ?? 0);
+                                $difference_row[$i] = ($map['INGRESOS'][$i] ?? 0) - ($summary_row[$i] ?? 0);
                             }
                             $this->replaceZerosWithNull($difference_row);
                             $year_data['detail'][] = $difference_row;
                         }
                     }
+        
                     $summary_row = array_fill(0, 15, 0);
-                    if ($id_tipomov == 1 || $id_tipomov == 4) {
-                        $summary_row[0] = 'INGRESOS';
-                        $summary_row[13] = $id_tipomov;
-                        $summary_row[14] = 2;
-                        $last_ingresos = $summary_row;
-                    } else if ($id_tipomov == 2 || $id_tipomov == 5) {
-                        $summary_row[0] = 'DESCUENTOS';
-                        $summary_row[13] = $id_tipomov;
-                        $summary_row[14] = 2;
-                    } else if ($id_tipomov == 3 || $id_tipomov == 6) {
-                        $summary_row[0] = 'APORTACIONES';
-                        $summary_row[13] = $id_tipomov;
-                        $summary_row[14] = 2;
+                    switch ($id_tipomov) {
+                        case 1:
+                        case 4:
+                            $summary_row[0] = 'INGRESOS';
+                            break;
+                        case 2:
+                        case 5:
+                            $summary_row[0] = 'DESCUENTOS';
+                            break;
+                        case 3:
+                        case 6:
+                            $summary_row[0] = 'APORTACIONES';
+                            break;
                     }
-
+                    $summary_row[13] = $id_tipomov;
+                    $summary_row[14] = 2;
+        
                     $last_tipomov = $id_tipomov;
                 }
-                // Asigna el monto al mes correspondiente.
+        
                 if ($month >= 1 && $month <= 12) {
-                    $row[$month] = number_format($amount, 2, '.', ''); //$amount;
+                    $row[$month] = number_format($amount, 2, '.', '');
                     $summary_row[$month] += $amount;
                 }
             }
-
-            // Agrega los datos restantes del último concepto y año.
+        
             if (!empty($row)) {
                 $year_data['detail'][] = $row;
             }
+        
             if (!empty($summary_row)) {
                 $this->replaceZerosWithNull($summary_row);
                 $year_data['detail'][] = $summary_row;
-                //aqui deberia agregarse la diferencia de sumary INGRESOS - DESCUENTOS
+        
                 if ($summary_row[0] === 'DESCUENTOS') {
                     $difference_row = array_fill(0, 15, 0);
                     $difference_row[0] = 'TOTAL PAGO';
+                    $difference_row[14] = 2;
                     for ($i = 1; $i <= 12; $i++) {
-                        $difference_row[$i] = ($last_ingresos[$i] ?? 0) - ($summary_row[$i] ?? 0);
+                        $difference_row[$i] = ($map['INGRESOS'][$i] ?? 0) - ($summary_row[$i] ?? 0);
                     }
                     $this->replaceZerosWithNull($difference_row);
                     $year_data['detail'][] = $difference_row;
                 }
             }
+        
             if (!empty($year_data)) {
                 $data[] = $year_data;
             }
-
+        
             $stmt->close();
         }
-
         $mysqli->close();
 
 
