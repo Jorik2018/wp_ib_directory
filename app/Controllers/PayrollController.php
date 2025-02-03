@@ -106,17 +106,20 @@ class PayrollController extends Controller
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
         $employee = $o['employee'];
         if (!isset($o['items'])) {
-            $data = $wpdb->get_results($wpdb->prepare("SELECT pc.concept,pc.amount,p.month,pc.concept_type_id 
+
+            $data = $wpdb->get_results($wpdb->prepare("SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,pc.concept_id 
             FROM grupoipe_erp.rem_payroll_concept pc 
-INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id
-WHERE pc.people_id=%s and p.year=%d
-ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']), ARRAY_A);
+            INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id
+            WHERE pc.people_id=%s and p.year=%d
+            ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']), ARRAY_A);
+
             if ($wpdb->last_error) return t_error();
 
             $aggregatedData = [];
 
             foreach ($data as $row) {
                 $concept = $row["concept"];
+                
                 $type = (int)$row["concept_type_id"];
                 $month = (int)$row["month"];
                 $amount = (float)$row["amount"];
@@ -128,6 +131,7 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
                 if (!isset($aggregatedData[$key])) {
                     $aggregatedData[$key] = [
                         "concept" => $concept,
+                        "conceptId" => $row["concept_id"],
                         "type" => $type
                     ];
                 }
@@ -144,7 +148,23 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
         }
         $wpdb->select('grupoipe_erp');
         $items = $o['items'];
-        $payrolls = $wpdb->get_results($wpdb->prepare("SELECT id,month FROM grupoipe_erp.rem_payroll WHERE year=" . $o['year']), ARRAY_A);
+        
+        $payrolls = $wpdb->get_results($wpdb->prepare("SELECT id,month FROM grupoipe_erp.rem_payroll WHERE year=%d", $o['year']), ARRAY_A);
+        $payroll_ids = array_column($payrolls, 'id');
+
+        if (!empty($payroll_ids)) {
+            // Crear placeholders para la consulta IN
+            $placeholders = implode(',', array_fill(0, count($payroll_ids), '%d'));
+            // Construir la consulta de eliminación
+            $query = $wpdb->prepare("
+                DELETE FROM grupoipe_erp.rem_payroll_concept 
+                WHERE people_id = %s AND payroll_id IN ($placeholders)
+            ", array_merge([$employee['id']], $payroll_ids));
+            // Ejecutar la consulta
+            $wpdb->query($query);
+        }
+        
+        
         if ($wpdb->last_error) return t_error();
         $payroll_map = [];
         foreach ($payrolls as $payroll) {
@@ -230,7 +250,6 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
         $people = $wpdb->get_row($wpdb->prepare("SELECT * FROM grupoipe_erp.drt_people WHERE id=%d", $employee['people_id']), ARRAY_A);
         $people['ruc'] = $employee['ruc'];
         if ($wpdb->last_error) return t_error();
-
         $experiences = $wpdb->get_results($wpdb->prepare("SELECT * FROM grupoipe_erp.hr_experience WHERE employee_id=%d", $employee['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
 
@@ -244,12 +263,14 @@ ORDER BY  pc.concept_type_id, pc.concept_id DESC", $employee['id'], $o['year']),
             die("Error de conexión: " . $mysqli->connect_error);
         }
         $data = [];
+
         $query = "SELECT pc.concept,pc.amount,p.month,pc.concept_type_id,p.year 
         FROM grupoipe_erp.rem_payroll_concept pc 
         INNER JOIN grupoipe_erp.rem_payroll p ON p.id=pc.payroll_id 
         WHERE pc.people_id=" . $employee['id'] .
             ($year > 0 ? " AND p.year=" . $year : "")
             . " ORDER BY p.year,pc.concept_type_id, pc.concept_id DESC";
+
         $last_concept = "";
         $last_year = "";
         $last_tipomov = 0;

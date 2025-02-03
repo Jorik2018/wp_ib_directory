@@ -236,8 +236,8 @@ class PregnantController extends Controller
     
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed,COUNT(v.id) AS visits FROM ds_gestante g ".
             "LEFT JOIN ds_gestante_visita v ON v.gestante_id=g.id 
-            LEFT JOIN grupoipe_project.MAESTRO_RED r ON r.codigo_red=g.red
-            LEFT JOIN grupoipe_project.MAESTRO_MICRORED mr ON mr.codigo_cocadenado=g.microred
+            LEFT JOIN grupoipe_master.ipress_red r ON r.codigo_red=g.red
+            LEFT JOIN grupoipe_master.ipress_microred mr ON mr.codigo_cocadenado=g.microred
             WHERE g.canceled=0 ".(isset($numeroDNI)?" AND g.numero_dni like '%$numeroDNI%' ":"")
                 .(isset($fullName)?" AND CONCAT(g.apellido_paterno,g.apellido_materno,g.nombres) like '%$fullName%' ":"")
                 .(isset($red)?" AND g.red like '%$red%' ":"")
@@ -261,11 +261,15 @@ class PregnantController extends Controller
     }
 
 
+
     public function visit_pag($request){
         global $wpdb;
         $from=$request['from'];
         $to=$request['to'];
-        $gestanteId=method_exists($request,'get_param')?$request->get_param('gestanteId'):$request['gestanteId'];
+        $gestanteId=(!is_array($request) && method_exists($request, 'get_param'))?$request->get_param('gestanteId'):$request['gestanteId'];
+        
+
+
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM ds_gestante_visita d Where canceled=0 ".($gestanteId?"AND gestante_id=$gestanteId":"")." ORDER BY id desc ".($to?"LIMIT ". $from.', '. $to:""),ARRAY_A);
