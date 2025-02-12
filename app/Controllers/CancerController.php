@@ -29,6 +29,23 @@ class CancerController extends Controller
                 'CANCER_READ'         => true
             )
         );
+
+        add_role(
+            'inventory_register',
+            'inventory_register',
+            array(
+                'INVENTORY_ADMIN'         => true,
+                'INVENTORY_READ'         => true
+            )
+        );
+        add_role(
+            'inventory_register',
+            'inventory_register',
+            array(
+                'INVENTORY_ADMIN'         => true,
+                'INVENTORY_READ'         => true
+            )
+        );
     }
 
     public function rest_api_init()
