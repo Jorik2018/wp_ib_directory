@@ -31,8 +31,8 @@ class CancerController extends Controller
         );
 
         add_role(
-            'inventory_register',
-            'inventory_register',
+            'inventory_admin',
+            'inventory_admin',
             array(
                 'INVENTORY_ADMIN'         => true,
                 'INVENTORY_READ'         => true
