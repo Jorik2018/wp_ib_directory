@@ -140,7 +140,7 @@ class AdultoMayorController extends Controller
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM grupoipe_erp.mon_adultomayor o ".
             "WHERE o.canceled=0 ".
-            (isset($apellidos_nombres)?" AND o.apellidos_nombres LIKE '%$apellidos_nombres%' ":"").
+            (isset($apellidos_nombres)?" AND o.apellidos_nombres LIKE '%".strtoupper($apellidos_nombres)."%' ":"").
             (isset($dni)?" AND o.dni LIKE '%$dni%' ":"").
             (isset($establecimiento)?" AND o.establecimiento LIKE '%$establecimiento%' ":"").
             (isset($province)?" AND o.province LIKE '%$province%' ":"").
