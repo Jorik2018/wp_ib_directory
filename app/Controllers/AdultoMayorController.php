@@ -8,6 +8,7 @@ use function IB\directory\Util\cfield;
 use function IB\directory\Util\camelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
+use function \wp_get_current_user;
 
 class AdultoMayorController extends Controller
 {
@@ -49,7 +50,7 @@ class AdultoMayorController extends Controller
             'callback' => array($this,'get')
         ));
 
-        register_rest_route( 'api/desarrollo-social', '/adulto-mayor/(?P<id>)',array(
+        register_rest_route( 'api/desarrollo-social', '/adulto-mayor/(?P<ids>[0-9,]+)',array(
             'methods' => 'DELETE',
             'callback' => array($this,'delete')
         ));
@@ -151,7 +152,19 @@ class AdultoMayorController extends Controller
 
     public function delete($data){
         global $wpdb;
-        $row = $wpdb->update('mon_adultomayor',array('canceled'=>1),array('id'=>$data['id']));
-        return $row;
+        $original_db = $wpdb->dbname;
+        $wpdb->select('grupoipe_erp');
+        $wpdb->query('START TRANSACTION');
+        $result = array_map(function ($id) use ($wpdb) {
+            return $wpdb->update('mon_adultomayor', array('canceled' => 1, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['id']));
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
+        $wpdb->select($original_db);
+        return $success;
     }
 }
