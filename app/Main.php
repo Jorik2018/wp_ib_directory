@@ -46,6 +46,9 @@ class Main extends Bridge {
         $this->add_action( 'init','AdminController@init');
         $this->add_action( 'rest_api_init','CancerController@rest_api_init');
         $this->add_action( 'init','CancerController@init');
+        $this->add_action( 'rest_api_init','AdultoMayorController@rest_api_init');
+        $this->add_action( 'init','AdultoMayorController@init');
+
         $this->add_action( 'rest_api_init','DirectoryController@rest_api_init');
         $this->add_action( 'init','DirectoryController@init');
         $this->add_action( 'rest_api_init','SivicoController@rest_api_init');
