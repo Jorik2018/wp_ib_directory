@@ -3,6 +3,7 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
+
 /**
  * AdminController
  * WordPress MVC controller.
@@ -13,7 +14,8 @@ use WPMVC\MVC\Controller;
  */
 class AdminController extends Controller
 {
-    public function display_hello_world_page() {
+    public function display_hello_world_page()
+    {
         /*$view = $this->view->get('view.hello-world');
         // View is prrinted
         // Array of parameters ar passed to the view
@@ -21,18 +23,18 @@ class AdminController extends Controller
             'param1' => true,
             'model'  => MyModel::find()
         ]);*/
-       // $view = $this->view->get( 'hello-world' );
+        // $view = $this->view->get( 'hello-world' );
         // Print a view
         //$this->view->show( 'hello-world' );
-       
+
         //$view = $this->view->get( 'hello-world' );
         // Print a view
-        if ( $this->user ) {
-            $this->view->show( 'hello-world', [
+        if ($this->user) {
+            $this->view->show('hello-world', [
                 'display_name' => $this->user->display_name,
                 'email'        => $this->user->user_email,
-                'people'=>['id'=>77,"name"=>"OOOO"]
-            ] );
+                'people' => ['id' => 77, "name" => "OOOO"]
+            ]);
         }
         //return $this->view->get( 'hello-world' );
         //return $this->view->get( 'views.hello-world' );
@@ -41,22 +43,23 @@ class AdminController extends Controller
     public function init()
     {
         add_menu_page(
-            'Hello World',// page title
-            'Hello World',// menu title
-            'manage_options',// capability
-            'hello-world',// menu slug
-            array($this,'display_hello_world_page') // callback function
+            'Hello World', // page title
+            'Hello World', // menu title
+            'manage_options', // capability
+            'hello-world', // menu slug
+            array($this, 'display_hello_world_page') // callback function
         );
     }
 
-    function jal_install() {
+    function jal_install()
+    {
         global $wpdb;
         global $jal_db_version;
-    
+
         $table_name = $wpdb->prefix . 'liveshoutbox';
-        
+
         $charset_collate = $wpdb->get_charset_collate();
-    
+
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -65,34 +68,44 @@ class AdminController extends Controller
             url varchar(55) DEFAULT '' NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
-    
+
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        dbDelta( $sql );
+        dbDelta($sql);
         //https://codex.wordpress.org/Creating_Tables_with_Plugins
-        add_option( 'jal_db_version', $jal_db_version );
+        add_option('jal_db_version', $jal_db_version);
     }
 
-    function activate() {
+    function activate()
+    {
         global $jal_db_version;
-        if ( get_site_option( 'jal_db_version' ) != $jal_db_version ) {
+        if (get_site_option('jal_db_version') != $jal_db_version) {
             $this->jal_install();
         }
     }
 
-    function upload_post(){
-        $dir_subida = $_SERVER['DOCUMENT_ROOT'].'/uploads/';
-        $file=$_FILES['file'];
-        mkdir( $dir_subida, 0777, true );
-        $file['tempFile']=time(). "_".basename($file['name']);
-        $file['success']=move_uploaded_file($file['tmp_name'],$dir_subida .$file['tempFile']);
+    function upload_post()
+    {
+        $dir_subida = $_SERVER['DOCUMENT_ROOT'] . '/uploads/';
+        $file = $_FILES['file'];
+        // Verifica si hubo errores en la subida
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return ['error' => 'Error al subir el archivo. Código: ' . $file['error']];
+        }
+
+        // Asegurar que el directorio existe
+        if (!is_dir($dir_subida)) {
+            mkdir($dir_subida, 0777, true);
+        }
+        $file['tempFile'] = time() . "_" . basename($file['name']);
+        $file['success'] = move_uploaded_file($file['tmp_name'], $dir_subida . $file['tempFile']);
         return $file;
     }
 
-    function rest_api_init(){
-        register_rest_route('/api/file', '/upload',array(
+    function rest_api_init()
+    {
+        register_rest_route('/api/file', '/upload', array(
             'methods' => 'POST',
-            'callback' => array($this,'upload_post')
+            'callback' => array($this, 'upload_post')
         ));
     }
-
 }
