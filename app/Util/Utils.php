@@ -84,6 +84,13 @@ function cfield(&$row,$from,$to){
     return $row;
 }
 
+function get_param($request, $param_name) {
+    if (is_object($request) && method_exists($request, 'get_param')) {
+        return $request->get_param($param_name);
+    }
+    return isset($request[$param_name]) ? $request[$param_name] : null;
+}
+
 function remove(array &$arr, $key) {
     if (array_key_exists($key, $arr)) {
         $val = $arr[$key];

@@ -8,6 +8,8 @@ use function IB\directory\Util\cfield;
 use function IB\directory\Util\camelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
+use function IB\directory\Util\get_param;
+
 
 class EmedController extends Controller
 {
@@ -256,7 +258,7 @@ class EmedController extends Controller
         global $wpdb;
         $from = $request['from'];
         $to = $request['to'];
-        $emed = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('emed') : $request['emed'];
+        $emed = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM ds_emed_file g " .
@@ -279,21 +281,31 @@ class EmedController extends Controller
     function pag($request)
     {
         global $wpdb;
-        $edb = 2;
         $from = $request['from'];
         $to = $request['to'];
-        $numeroDNI = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('numeroDNI') : $request['numeroDNI'];
-        $category = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('category') : $request['category'];
-        $type = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('type') : $request['type'];
-        $detail = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('detail') : $request['detail'];
+        $numeroDNI = get_param($request, 'numeroDNI');
+        $category = get_param($request, 'category');
+        $type = get_param($request, 'type');
+        $description = get_param($request, 'description');
+        $direccion = get_param($request, 'direccion');
+        $datetime = get_param($request, 'datetime');
+        list($datetimeFrom, $datetimeTo) = explode('|', $datetime);
+        $datetimeFrom = !empty($datetimeFrom) ? $datetimeFrom : null;
+        $datetimeTo = !empty($datetimeTo) ? $datetimeTo : null;
+        $code = get_param($request, 'code');
+        $detail = get_param($request, 'detail');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM ds_emed g " .
             "WHERE g.canceled=0 " .
             (isset($numeroDNI) ? " AND g.numero_dni like '%$numeroDNI%' " : "") .
             (isset($category) ? " AND g.category like '%$category%' " : "") .
-            (isset($type) ? " AND g.type like '%$type%' " : "") .
-            (isset($detail) ? " AND g.detail like '%$detail%' " : "") .
+            ($description  ? " AND g.description  like '%".str_replace(' ', '%', $description)."%' " : "") .
+            ($type ? " AND g.type like '%$type%' " : "") .
+            ($code ? " AND g.code like '%$code%' " : "") .
+            ($detail ? " AND g.detail like '%$detail%' " : "") .
+            ($datetimeFrom ? " AND Date(g.date) >= '$datetimeFrom' " : "") .
+            ($datetimeTo ? " AND date(g.date) <= '$datetimeTo' " : "") .
             "ORDER BY g.id DESC " .
             ($to > 0 ? ("LIMIT " . $from . ', ' . $to) : ""), ARRAY_A);
 
@@ -536,7 +548,7 @@ class EmedController extends Controller
     function get($data)
     {
         global $wpdb;
-        $data=is_object($data) && method_exists($data,'get_params')?$data->get_params():$data;
+        $data = is_object($data) && method_exists($data, 'get_params') ? $data->get_params() : $data;
         $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed WHERE id=" . $data['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         $o['files'] = $this->file_pag(array("emed" => $o['id']));
