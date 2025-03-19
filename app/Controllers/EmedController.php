@@ -303,6 +303,7 @@ class EmedController extends Controller
             ($description  ? " AND g.description  like '%".str_replace(' ', '%', $description)."%' " : "") .
             ($type ? " AND g.type like '%$type%' " : "") .
             ($code ? " AND g.code like '%$code%' " : "") .
+            ($direccion ? " AND g.direccion like '%$direccion%' " : "") .
             ($detail ? " AND g.detail like '%$detail%' " : "") .
             ($datetimeFrom ? " AND Date(g.date) >= '$datetimeFrom' " : "") .
             ($datetimeTo ? " AND date(g.date) <= '$datetimeTo' " : "") .
