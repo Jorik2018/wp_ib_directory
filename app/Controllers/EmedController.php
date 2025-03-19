@@ -287,7 +287,7 @@ class EmedController extends Controller
         $category = get_param($request, 'category');
         $type = get_param($request, 'type');
         $description = get_param($request, 'description');
-        $direccion = get_param($request, 'direccion');
+        $referencia = get_param($request, 'referencia');
         $datetime = get_param($request, 'datetime');
         list($datetimeFrom, $datetimeTo) = explode('|', $datetime);
         $datetimeFrom = !empty($datetimeFrom) ? $datetimeFrom : null;
@@ -303,7 +303,7 @@ class EmedController extends Controller
             ($description  ? " AND g.description  like '%".str_replace(' ', '%', $description)."%' " : "") .
             ($type ? " AND g.type like '%$type%' " : "") .
             ($code ? " AND g.code like '%$code%' " : "") .
-            ($direccion ? " AND g.direccion like '%$direccion%' " : "") .
+            ($referencia ? " AND g.referencia like '%$referencia%' " : "") .
             ($detail ? " AND g.detail like '%$detail%' " : "") .
             ($datetimeFrom ? " AND Date(g.date) >= '$datetimeFrom' " : "") .
             ($datetimeTo ? " AND date(g.date) <= '$datetimeTo' " : "") .
