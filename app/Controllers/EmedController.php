@@ -19,6 +19,7 @@ class EmedController extends Controller
         remove_role('emed_admin');
         remove_role('emed_register');
         remove_role('emed_inst');
+        remove_role('emed_read');
         add_role(
             'emed_read',
             'emed_read',
