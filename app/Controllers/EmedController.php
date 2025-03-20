@@ -31,6 +31,7 @@ class EmedController extends Controller
             'emed_admin',
             'emed_admin',
             array(
+                'EMED_REGISTER' => true,
                 'EMED_ADMIN' => true,
                 'EMED_READ' => true,
                 'EMED_DET' => true
@@ -40,6 +41,7 @@ class EmedController extends Controller
             'emed_register',
             'emed_register',
             array(
+                'EMED_REGISTER' => true,
                 'EMED_ADMIN' => true,
                 'EMED_READ' => true,
                 'EMED_DET' => true
@@ -49,6 +51,7 @@ class EmedController extends Controller
             'emed_inst',
             'emed_inst',
             array(
+                'EMED_REGISTER' => true,
                 'EMED_ADMIN' => true,
                 'EMED_READ' => true
             )
