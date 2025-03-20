@@ -20,6 +20,13 @@ class EmedController extends Controller
         remove_role('emed_register');
         remove_role('emed_inst');
         add_role(
+            'emed_read',
+            'emed_read',
+            array(
+                'EMED_READ' => true
+            )
+        );
+        add_role(
             'emed_admin',
             'emed_admin',
             array(
