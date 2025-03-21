@@ -9,6 +9,7 @@ use function IB\directory\Util\camelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 use function IB\directory\Util\get_param;
+use function IB\directory\Util\toCamelCase;
 
 
 class EmedController extends Controller
@@ -42,7 +43,6 @@ class EmedController extends Controller
             'emed_register',
             array(
                 'EMED_REGISTER' => true,
-                'EMED_ADMIN' => true,
                 'EMED_READ' => true,
                 'EMED_DET' => true
             )
