@@ -3,7 +3,7 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-
+use function add_menu_page;
 /**
  * AdminController
  * WordPress MVC controller.
@@ -42,13 +42,13 @@ class AdminController extends Controller
 
     public function init()
     {
-        add_menu_page(
+        /*add_menu_page(
             'Hello World', // page title
             'Hello World', // menu title
             'manage_options', // capability
             'hello-world', // menu slug
             array($this, 'display_hello_world_page') // callback function
-        );
+        );*/
     }
 
     function jal_install()

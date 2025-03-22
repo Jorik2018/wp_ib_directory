@@ -84,11 +84,11 @@ function cfield(&$row,$from,$to){
     return $row;
 }
 
-function get_param($request, $param_name) {
+function get_param($request, $param_name=null) {
     if (is_object($request) && method_exists($request, 'get_param')) {
-        return $request->get_param($param_name);
+        return $param_name?$request->get_param($param_name):$param_name;
     }
-    return isset($request[$param_name]) ? $request[$param_name] : null;
+    return $param_name?(isset($request[$param_name]) ? $request[$param_name] : null):$request;
 }
 
 function remove(array &$arr, $key) {

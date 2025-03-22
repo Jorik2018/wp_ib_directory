@@ -11,7 +11,6 @@ add_filter( 'woocommerce_prevent_admin_access', '__return_false' );
 add_filter( 'woocommerce_disable_admin_bar', '__return_false' );
 
 
-
 /**
  * Modify the JWT authentication response.
  *

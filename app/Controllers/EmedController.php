@@ -2,6 +2,7 @@
 
 namespace IB\directory\Controllers;
 
+use WP_Error;
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
@@ -70,7 +71,10 @@ class EmedController extends Controller
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<id>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'get')
+            'callback' => array($this, 'get'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<pregnant>\d+)/visit/number', array(
             'methods' => 'GET',
@@ -86,7 +90,10 @@ class EmedController extends Controller
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'pag')
+            'callback' => array($this, 'pag'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/resource/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
@@ -161,7 +168,7 @@ class EmedController extends Controller
     function bulk($request)
     {
         global $wpdb;
-        $rl = $request->get_params();
+        $rl = get_param($request);
         file_put_contents("data2.json", json_encode($rl));
         $current_user = wp_get_current_user();
         $aux = array();
@@ -222,7 +229,7 @@ class EmedController extends Controller
     function file_post(&$request)
     {
         global $wpdb;
-        $o = is_object($request) && method_exists($request, 'get_params') ? $request->get_params() : $request;
+        $o = get_param($request);
         $current_user = wp_get_current_user();
         cfield($o, 'emedId', 'emed_id');
         //cdfield($o,'fecha');
@@ -307,11 +314,11 @@ class EmedController extends Controller
         $detail = get_param($request, 'detail');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM ds_emed g " .
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,(g.uid_insert = $current_user->ID) AS editable FROM ds_emed g " .
             "WHERE g.canceled=0 " .
             (isset($numeroDNI) ? " AND g.numero_dni like '%$numeroDNI%' " : "") .
             (isset($category) ? " AND g.category like '%$category%' " : "") .
-            ($description  ? " AND g.description  like '%".str_replace(' ', '%', $description)."%' " : "") .
+            ($description  ? " AND g.description  like '%" . str_replace(' ', '%', $description) . "%' " : "") .
             ($type ? " AND g.type like '%$type%' " : "") .
             ($code ? " AND g.code like '%$code%' " : "") .
             ($referencia ? " AND g.referencia like '%$referencia%' " : "") .
@@ -336,7 +343,7 @@ class EmedController extends Controller
     function post(&$request)
     {
         global $wpdb;
-        $o = is_object($request) && method_exists($request, 'get_params') ? $request->get_params() : $request;
+        $o = get_param($request);
         $current_user = wp_get_current_user();
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
@@ -454,7 +461,7 @@ class EmedController extends Controller
     function action_post(&$request)
     {
         global $wpdb;
-        $o = is_object($request) && method_exists($request, 'get_params') ? $request->get_params() : $request;
+        $o = get_param($request);
         $current_user = wp_get_current_user();
         cfield($o, 'emedId', 'emed_id');
         cdfield($o, 'fecha');
@@ -487,7 +494,7 @@ class EmedController extends Controller
     function damage_ipress_post(&$request)
     {
         global $wpdb;
-        $o = is_object($request) && method_exists($request, 'get_params') ? $request->get_params() : $request;
+        $o = get_param($request);
         $current_user = wp_get_current_user();
         cfield($o, 'emedId', 'emed_id');
         //cdfield($o,'fecha');
@@ -520,7 +527,7 @@ class EmedController extends Controller
     function damage_salud_post(&$request)
     {
         global $wpdb;
-        $o = is_object($request) && method_exists($request, 'get_params') ? $request->get_params() : $request;
+        $o = get_param($request);
         $current_user = wp_get_current_user();
         cfield($o, 'emedId', 'emed_id');
         cdfield($o, 'fecha');
@@ -552,17 +559,24 @@ class EmedController extends Controller
 
     function delete($data)
     {
-        global $wpdb;
-        $row = $wpdb->update('ds_emed', array('canceled' => 1), array('id' => $data['id']));
-        return $row;
+        $current_user = wp_get_current_user();
+        if ($current_user->has_cap('EMED_ADMIN')) {
+            global $wpdb;
+            $row = $wpdb->update('ds_emed', array('canceled' => 1), array('id' => $data['id']));
+            return $row;
+        } else {
+            return new WP_Error('rest_forbidden', __('Unauthorized'));
+        }
     }
 
     function get($data)
     {
         global $wpdb;
-        $data = is_object($data) && method_exists($data, 'get_params') ? $data->get_params() : $data;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed WHERE id=" . $data['id']), ARRAY_A);
+        $id = get_param($data,'id');
+        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed WHERE id=" . $id), ARRAY_A);
         if ($wpdb->last_error) return t_error();
+        $current_user = wp_get_current_user();
+        $o['editable'] = $o['uid_insert'] == $current_user->ID;
         $o['files'] = $this->file_pag(array("emed" => $o['id']));
         $o['action'] = $this->action_pag(array("emed" => $o['id']));
         $o['damage_ipress'] = $this->damage_ipress_pag(array("emed" => $o['id']));
@@ -575,7 +589,7 @@ class EmedController extends Controller
         global $wpdb;
         $from = $request['from'];
         $to = $request['to'];
-        $emed_id = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('emed') : $request['emed'];
+        $emed_id = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM ds_emed_action o " .
@@ -592,7 +606,7 @@ class EmedController extends Controller
         global $wpdb;
         $from = $request['from'];
         $to = $request['to'];
-        $emed = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('emed') : $request['emed'];
+        $emed = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM ds_emed_damage_ipress o " .
@@ -609,14 +623,14 @@ class EmedController extends Controller
         global $wpdb;
         $from = $request['from'];
         $to = $request['to'];
-        $emed = is_object($request) && method_exists($request, 'get_param') ? $request->get_param('emed') : $request['emed'];
+        $emed = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM ds_emed_damage_salud g " .
             "WHERE g.canceled=0 " . (isset($emed) ? " AND g.emed_id like '$emed' " : "") .
             ($to > 0 ? ("LIMIT " . $from . ', ' . $to) : ""), ARRAY_A);
-
         if ($wpdb->last_error) return t_error();
         return $to > 0 ? array('data' => $results, 'size' => $wpdb->get_var('SELECT FOUND_ROWS()')) : $results;
     }
+
 }
