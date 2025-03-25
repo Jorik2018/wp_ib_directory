@@ -6,7 +6,8 @@ namespace IB\directory\Util;
 
 use WPMVC\Bridge;
 
-function camelCase($string, $capitalizeFirstCharacter = false) {
+function camelCase($string, $capitalizeFirstCharacter = false)
+{
 
     $str = str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $string)));
 
@@ -17,7 +18,8 @@ function camelCase($string, $capitalizeFirstCharacter = false) {
     return $str;
 }
 
-function toCamelCase($data) {
+function toCamelCase($data)
+{
     if (is_object($data)) {
         $result = new \stdClass();
         foreach ($data as $key => $value) {
@@ -26,72 +28,82 @@ function toCamelCase($data) {
         }
         return  $result;
     } elseif (is_array($data)) {
-		$keys = array_keys($data);
-		$isNumeric = false;
-		foreach ($keys as $key) {
-			if (is_int($key)) {
-				$isNumeric = true;
-			}
-			break;
-		}
-		if($isNumeric){
-			$result = array();
-			foreach ($data as $item) {
-				$result[] = toCamelCase($item);
-			}
-			return $result;
-		}else{
-			$result = new \stdClass();
-			foreach ($data as $key => $value) {
-				$newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
-				$result->$newKey = $value;
-			}
-			return  $result;
-		}
+        $keys = array_keys($data);
+        $isNumeric = false;
+        foreach ($keys as $key) {
+            if (is_int($key)) {
+                $isNumeric = true;
+            }
+            break;
+        }
+        if ($isNumeric) {
+            $result = array();
+            foreach ($data as $item) {
+                $result[] = toCamelCase($item);
+            }
+            return $result;
+        } else {
+            $result = new \stdClass();
+            foreach ($data as $key => $value) {
+                $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
+                $result->$newKey = $value;
+            }
+            return  $result;
+        }
     } else {
         return $data;
     }
 }
 
-function cdfield(&$row,$key){
-    if(is_numeric($row[$key])){
-        $row[$key]=date("Y-m-d",$row[$key]/1000);
+function cdfield(&$row, $key)
+{
+    if (is_numeric($row[$key])) {
+        $row[$key] = date("Y-m-d", $row[$key] / 1000);
     }
     return $row;
 }
 
-function cbfield(&$row,$key){
-    if(is_numeric($row[$key])){
-		$v=$row[$key];
-		unset($row[$key]);
-        $row[$key]=intval($v)>0;
+function cbfield(&$row, $key)
+{
+    if (is_numeric($row[$key])) {
+        $v = $row[$key];
+        unset($row[$key]);
+        $row[$key] = intval($v) > 0;
     }
     return $row;
 }
 
-function cdfield2(&$row,$key){
-    if(is_numeric($row[$key])){
-        $row[$key]=date("Y-m-d H:i:s",$row[$key]/1000);
+function cdfield2(&$row, $key)
+{
+    if (is_numeric($row[$key])) {
+        $row[$key] = date("Y-m-d H:i:s", $row[$key] / 1000);
     }
     return $row;
 }
 
-function cfield(&$row,$from,$to){
-    if(array_key_exists($from,$row)){
-        $row[$to]=$row[$from];
+function cfield(&$row, $from, $to)
+{
+    if (array_key_exists($from, $row)) {
+        $row[$to] = $row[$from];
         unset($row[$from]);
     }
     return $row;
 }
 
-function get_param($request, $param_name=null) {
-    if (is_object($request) && method_exists($request, 'get_param')) {
-        return $param_name?$request->get_param($param_name):$param_name;
+function get_param($request, $param_name = null)
+{
+    if ($param_name) {
+        if (is_object($request) && method_exists($request, 'get_param')) {
+            return $request->get_param($param_name);
+        }
+        return isset($request[$param_name]) ? $request[$param_name] : null;
+    } else {
+        return is_object($request) &&method_exists($request, 'get_params') ? $request->get_params() : $request;
     }
-    return $param_name?(isset($request[$param_name]) ? $request[$param_name] : null):$request;
 }
 
-function remove(array &$arr, $key) {
+function remove(array &$arr, $key)
+{
     if (array_key_exists($key, $arr)) {
         $val = $arr[$key];
         unset($arr[$key]);
@@ -100,10 +112,10 @@ function remove(array &$arr, $key) {
     return null;
 }
 
-function t_error($msg=false){
+function t_error($msg = false)
+{
     global $wpdb;
-    $error=new \WP_Error(500,$msg?$msg:$wpdb->last_error, array('status'=>500));
+    $error = new \WP_Error(500, $msg ? $msg : $wpdb->last_error, array('status' => 500));
     $wpdb->query('ROLLBACK');
     return $error;
 }
-

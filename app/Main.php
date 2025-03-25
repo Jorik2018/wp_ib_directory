@@ -68,6 +68,8 @@ class Main extends Bridge {
         $this->add_action( 'edit_user_profile', 'UserController@edit_user_profile' );
 
         $this->add_filter( 'jwt_auth_valid_credential_response', 'UserController@modify_jwt_auth_response', 10, 2);
+        //JWT Authentication for WP REST API
+        $this->add_filter( 'jwt_auth_token_before_dispatch', 'UserController@modify_jwt_auth_response', 10, 2);
     }
 
     public function on_admin() {
