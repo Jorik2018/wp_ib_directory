@@ -344,6 +344,7 @@ class EmedController extends Controller
     {
         global $wpdb;
         $o = get_param($request);
+        
         $current_user = wp_get_current_user();
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');

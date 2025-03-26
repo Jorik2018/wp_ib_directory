@@ -48,7 +48,9 @@ class DirectoryController extends Controller
     function cp_get() {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,Ubigeo_Centropoblado AS codccpp,Nombre_Centro_Poblado AS name FROM drt_ccpp 
+        $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
+        Ubigeo_Centropoblado AS codccpp,
+        Nombre_Centro_Poblado AS name FROM drt_ccpp 
              order by Ubigeo_Distrito,3");
         /*$results = $wpdb->get_results("SELECT 
             concat(ubigeo,codccpp) id,
@@ -120,7 +122,7 @@ class DirectoryController extends Controller
     function district_get($request) {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results( "SELECT d.id_distrito id,d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
+        $results = $wpdb->get_results( "SELECT d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
             d.codigo_dist LIKE '".$request['provinceId']."%'");
         if($wpdb->last_error)return t_error();
         return $results;
