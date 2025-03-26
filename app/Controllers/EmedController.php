@@ -67,7 +67,10 @@ class EmedController extends Controller
         ));
         register_rest_route('api/desarrollo-social', '/emed', array(
             'methods' => 'POST',
-            'callback' => array($this, 'post')
+            'callback' => array($this, 'post'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_REGISTER');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<id>\d+)', array(
             'methods' => 'GET',
@@ -82,11 +85,17 @@ class EmedController extends Controller
         ));
         register_rest_route('api/desarrollo-social', '/emed/visit/(?P<id>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'visit_get')
+            'callback' => array($this, 'visit_get'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<id>\d+)', array(
             'methods' => 'DELETE',
-            'callback' => array($this, 'delete')
+            'callback' => array($this, 'delete'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_ADMIN');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
@@ -97,63 +106,108 @@ class EmedController extends Controller
         ));
         register_rest_route('api/desarrollo-social', '/emed/resource/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'resource_pag')
+            'callback' => array($this, 'resource_pag'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/resource', array(
             'methods' => 'POST',
-            'callback' => array($this, 'resource_post')
+            'callback' => array($this, 'resource_post'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_REGISTER');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/action', array(
             'methods' => 'POST',
-            'callback' => array($this, 'action_post')
+            'callback' => array($this, 'action_post'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_REGISTER');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/action/(?P<id>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'action_get')
+            'callback' => array($this, 'action_get'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/action/(?P<id>\d+)', array(
             'methods' => 'DELETE',
-            'callback' => array($this, 'action_delete')
+            'callback' => array($this, 'action_delete'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_ADMIN');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/action/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'action_pag')
+            'callback' => array($this, 'action_pag'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress', array(
             'methods' => 'POST',
-            'callback' => array($this, 'damage_ipress_post')
+            'callback' => array($this, 'damage_ipress_post'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_REGISTER');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<id>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'damage_ipress_get')
+            'callback' => array($this, 'damage_ipress_get'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<id>\d+)', array(
             'methods' => 'DELETE',
-            'callback' => array($this, 'damage_ipress_delete')
+            'callback' => array($this, 'damage_ipress_delete'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_ADMIN');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'damage_ipress_pag')
+            'callback' => array($this, 'damage_ipress_pag'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'damage_salud_pag')
+            'callback' => array($this, 'damage_salud_pag'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud', array(
             'methods' => 'POST',
-            'callback' => array($this, 'damage_salud_post')
+            'callback' => array($this, 'damage_salud_post'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_REGISTER');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<id>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this, 'damage_salud_get')
+            'callback' => array($this, 'damage_salud_get'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_READ');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<id>\d+)', array(
             'methods' => 'DELETE',
-            'callback' => array($this, 'damage_salud_delete')
+            'callback' => array($this, 'damage_salud_delete'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_ADMIN');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/file', array(
             'methods' => 'POST',
-            'callback' => array($this, 'file_post')
+            'callback' => array($this, 'file_post'),
+            'permission_callback' => function () {
+                return current_user_can('EMED_REGISTER');
+            }
         ));
         register_rest_route('api/desarrollo-social', '/emed/file/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
@@ -344,7 +398,7 @@ class EmedController extends Controller
     {
         global $wpdb;
         $o = get_param($request);
-        
+
         $current_user = wp_get_current_user();
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
