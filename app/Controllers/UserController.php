@@ -149,11 +149,11 @@ class UserController extends Controller
         // Example: Add user meta data to the response
         //$user_meta = get_user_meta($user->ID);
         $token = $response['data']['token'];
+        if(!$token)$token = $response['data']['jwt'];
         $nicename = $response['data']['nicename'];
-        unset($response['data']['token']);
         unset($response['data']);
         $response['token'] = $token;
-        $response['user_nicename'] = $nicename;
+        $response['user_nicename'] = $nicename?$nicename:$user->data->user_nicename;
         return $response;
     }
 }
