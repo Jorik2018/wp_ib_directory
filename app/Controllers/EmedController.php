@@ -384,6 +384,7 @@ class EmedController extends Controller
 
         if ($wpdb->last_error) return t_error();
         foreach ($results as &$r) {
+            $r['editable']=(bool) $r['editable'];
             cfield($r, 'numero_dni', 'numeroDNI');
             cfield($r, 'estado_civil', 'estadoCivil');
             cfield($r, 'emergency_microred', 'emergencyMicrored');
