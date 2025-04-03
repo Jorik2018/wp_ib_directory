@@ -71,6 +71,7 @@ class Main extends Bridge {
         //JWT Authentication for WP REST API
         //$this->add_filter( 'jwt_auth_token_before_dispatch', 'UserController@modify_jwt_auth_response', 10, 2);
         $this->add_filter('simple_jwt_login_response_auth_user','UserController@modify_jwt_auth_response', 10, 2);
+        $this->add_filter('simple_jwt_login_response_refresh_token','UserController@modify_jwt_auth_response', 10, 2);
     }
 
     public function on_admin() {

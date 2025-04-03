@@ -400,6 +400,7 @@ class EmedController extends Controller
         $o = get_param($request);
 
         $current_user = wp_get_current_user();
+        remove($o, 'editable');
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
         if ($onlyUpload) return array('success' => true);
