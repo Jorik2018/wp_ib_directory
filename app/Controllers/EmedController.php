@@ -29,6 +29,7 @@ class EmedController extends Controller
                 'EMED_READ' => true
             )
         );
+        
         add_role(
             'emed_admin',
             'emed_admin',

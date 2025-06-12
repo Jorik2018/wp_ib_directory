@@ -12,40 +12,43 @@ use function IB\directory\Util\t_error;
 class DirectoryController extends Controller
 {
 
-    public function init(){}
+    public function init() {}
 
-    public function rest_api_init(){
-        register_rest_route( 'api/directory','region', array(
+    public function rest_api_init()
+    {
+        register_rest_route('api/directory', 'region', array(
             'methods' => 'GET',
-            'callback' => array($this,'region_get')
+            'callback' => array($this, 'region_get')
         ));
-        register_rest_route( 'api/directory','region/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory', 'region/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'region_get')
+            'callback' => array($this, 'region_get')
         ));
-        register_rest_route('api/directory','province/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory', 'province/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'province_get')
+            'callback' => array($this, 'province_get')
         ));
-        register_rest_route('api/directory','district/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory', 'district/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'district_get')
+            'callback' => array($this, 'district_get')
         ));
-        register_rest_route('api/directory','town/(?P<from>\d+)/(?P<to>\d+)', array(
+        register_rest_route('api/directory', 'town/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'cp_get')
+            'callback' => array($this, 'cp_get')
         ));
     }
 
-    function region_get() {
+    function region_get()
+    {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results( "SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
-        if($wpdb->last_error )return t_error();
+        $results = $wpdb->get_results("SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
+        if ($wpdb->last_error) return t_error();
         return $results;
     }
-    
-    function cp_get() {
+
+    function cp_get()
+    {
         global $wpdb;
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
@@ -66,14 +69,16 @@ class DirectoryController extends Controller
             union 
             SELECT distinct ccpp_cod id,codccpp,nombccpp name FROM muestra_pataz 
              order by 1");*/
-        if($wpdb->last_error)return t_error();
+        if ($wpdb->last_error) return t_error();
         return $results;
     }
-    
-    function api_town_get($request) {
+
+    function api_town_get($request)
+    {
         global $wpdb;
-        $wpdb->last_error='';
-        $results = $wpdb->get_results("SELECT substr(zona,1,1) tipo, 
+        $wpdb->last_error = '';
+        $results = $wpdb->get_results(
+            "SELECT substr(zona,1,1) tipo, 
         manzana id, 
         ccpp_cod as code, nombccpp as name, sufzona, sufzona, codmzna, sufmzna, 
         encuesta, hog_ccpp hogares, hog_ccpp vivienda FROM muestra_pataz      
@@ -106,26 +111,27 @@ class DirectoryController extends Controller
             vivienda
             FROM urbano"
         );
-        if($wpdb->last_error)return t_error();
+        if ($wpdb->last_error) return t_error();
         return $results;
     }
-    
-    function province_get($request) {
+
+    function province_get($request)
+    {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT d.nombre_prov name, d.codigo_prov code FROM drt_provincia d".($request['regionId']?"
-            WHERE d.codigo_prov LIKE '".sprintf('%02d',$request['regionId'])."%'":""));
-        if($wpdb->last_error )return t_error();
+        $results = $wpdb->get_results("SELECT d.nombre_prov name, d.codigo_prov code FROM drt_provincia d" . ($request['regionId'] ? "
+            WHERE d.codigo_prov LIKE '" . sprintf('%02d', $request['regionId']) . "%'" : ""));
+        if ($wpdb->last_error) return t_error();
         return $results;
     }
-    
-    function district_get($request) {
+
+    function district_get($request)
+    {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results( "SELECT d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
-            d.codigo_dist LIKE '".$request['provinceId']."%'");
-        if($wpdb->last_error)return t_error();
+        $results = $wpdb->get_results("SELECT d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
+            d.codigo_dist LIKE '" . $request['provinceId'] . "%'");
+        if ($wpdb->last_error) return t_error();
         return $results;
     }
-    
 }
