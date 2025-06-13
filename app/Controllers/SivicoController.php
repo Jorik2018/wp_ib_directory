@@ -66,8 +66,14 @@ class SivicoController extends Controller
         $to = $request['to'];
         if (!$to) $to = 10000;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_microred d WHERE 1=1 "
-            . ($request->get_param('red') ? "AND codigo_red=" . $request->get_param('red') : "") . " ORDER BY microred LIMIT " . $from . ', ' . $to, ARRAY_A);
+        $db = get_option("db_master");
+        if (isset($db)) {
+            $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM $db.ipress_microred d WHERE 1=1 "
+                . ($request->get_param('red') ? "AND codigo_red=" . $request->get_param('red') : "") . " ORDER BY microred LIMIT " . $from . ', ' . $to, ARRAY_A);
+        } else {
+            $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_microred d WHERE 1=1 "
+                . ($request->get_param('red') ? "AND codigo_red=" . $request->get_param('red') : "") . " ORDER BY microred LIMIT " . $from . ', ' . $to, ARRAY_A);
+        }
         if ($wpdb->last_error) return new \WP_Error(500, $wpdb->last_error, array('status' => 500));
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
         foreach ($results as &$r) {
