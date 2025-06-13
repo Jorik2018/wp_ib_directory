@@ -43,7 +43,12 @@ class DirectoryController extends Controller
         global $wpdb;
         $wpdb->last_error  = '';
         $db=get_option("db_master");
-        $results = $wpdb->get_results("SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
+        if(isset($db)){
+            $results = $wpdb->get_results("SELECT d.id,d.name name, d.id code FROM $db.ubigeo_peru_departments d");
+        }else{
+            $results = $wpdb->get_results("SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
+        
+        }
         if ($wpdb->last_error) return t_error();
         return $results;
     }
