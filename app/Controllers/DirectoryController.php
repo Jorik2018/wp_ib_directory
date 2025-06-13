@@ -42,6 +42,7 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
+        $db=get_option("db_master")
         $results = $wpdb->get_results("SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
         if ($wpdb->last_error) return t_error();
         return $results;
@@ -129,8 +130,16 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
+        $db=get_option("db_master");
+        if(isset($db)){
+        $results = $wpdb->get_results("SELECT d.name name, d.id code FROM $db.ubigeo_peru_districts d WHERE 
+            d.province_id LIKE '" . $request['provinceId'] . "%'");
+        }else{
         $results = $wpdb->get_results("SELECT d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
             d.codigo_dist LIKE '" . $request['provinceId'] . "%'");
+        }
+
+
         if ($wpdb->last_error) return t_error();
         return $results;
     }
