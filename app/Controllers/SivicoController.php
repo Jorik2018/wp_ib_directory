@@ -12,122 +12,127 @@ use function IB\directory\Util\t_error;
 class SivicoController extends Controller
 {
 
-    public function init(){}
+    public function init() {}
 
     public function rest_api_init()
     {
-        register_rest_route('api/desarrollo-social', 'red/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'red/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'red_pag')
+            'callback' => array($this, 'red_pag')
         ));
-        register_rest_route('api/desarrollo-social', 'cie/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'cie/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'cie_pag')
+            'callback' => array($this, 'cie_pag')
         ));
-        register_rest_route('api/desarrollo-social', 'microred/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'microred/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'microred_pag') 
+            'callback' => array($this, 'microred_pag')
         ));
-        register_rest_route('api/desarrollo-social', 'establishment/(?P<from>\d+)/(?P<to>\d+)',array(
+        register_rest_route('api/desarrollo-social', 'establishment/(?P<from>\d+)/(?P<to>\d+)', array(
             'methods' => 'GET',
-            'callback' => array($this,'eess_pag')
-        ));       
+            'callback' => array($this, 'eess_pag')
+        ));
     }
 
-    function red_pag($request) {
+    function red_pag($request)
+    {
         global $wpdb;
         //$wpdb = new wpdb('grupoipe_wp980','20penud21.*.','grupoipe_vetatrem','localhost');
         //$wpdb->show_errors();
-        $from=$request['from'];
-        $to=$request['to'];
-        
+        $from = $request['from'];
+        $to = $request['to'];
+
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_red d ORDER BY red".($to?"LIMIT ". $from.', '. $to:""),ARRAY_A );
-        if($wpdb->last_error )return new \WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
-        foreach ($results as &$r){
-            foreach ($r as $key => &$value){
-                $v=$r[$key];
-                $r[strtolower($key)]=$v;
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_red d ORDER BY red" . ($to ? "LIMIT " . $from . ', ' . $to : ""), ARRAY_A);
+        if ($wpdb->last_error) return new \WP_Error(500, $wpdb->last_error, array('status' => 500));
+        foreach ($results as &$r) {
+            foreach ($r as $key => &$value) {
+                $v = $r[$key];
+                $r[strtolower($key)] = $v;
             }
-            $r['name']=$r['red'];
-            $r['code']=$r['codigo_red'];
+            $r['name'] = $r['red'];
+            $r['code'] = $r['codigo_red'];
         }
-        $count=$wpdb->get_var('SELECT FOUND_ROWS()');
-        return $request['to']?array('data'=>$results,'size'=>$count):$results;
+        $count = $wpdb->get_var('SELECT FOUND_ROWS()');
+        return $request['to'] ? array('data' => $results, 'size' => $count) : $results;
     }
-    
-    function microred_pag($request) {
+
+    function microred_pag($request)
+    {
         global $wpdb;
         //$wpdb = new wpdb('grupoipe_wp980','20penud21.*.','grupoipe_vetatrem','localhost');
         //$wpdb->show_errors();
-        $from=$request['from'];
-        $to=$request['to'];
-        if(!$to)$to=10000;
+        $from = $request['from'];
+        $to = $request['to'];
+        if (!$to) $to = 10000;
         $wpdb->last_error  = '';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM grupoipe_regexa_ecr.ipress_microred d WHERE 1=1 "
-            .($request->get_param('red')?"AND codigo_red=".$request->get_param('red'):"")." ORDER BY microred LIMIT ". $from.', '. $to,ARRAY_A );
-        if($wpdb->last_error )return new \WP_Error(500,$wpdb->last_error, array( 'status' => 500 ) );
+            . ($request->get_param('red') ? "AND codigo_red=" . $request->get_param('red') : "") . " ORDER BY microred LIMIT " . $from . ', ' . $to, ARRAY_A);
+        if ($wpdb->last_error) return new \WP_Error(500, $wpdb->last_error, array('status' => 500));
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
-        foreach ($results as &$r){
-            foreach ($r as $key => &$value){
-                $v=$r[$key];
+        foreach ($results as &$r) {
+            foreach ($r as $key => &$value) {
+                $v = $r[$key];
                 //unset($r[$key]);
-                $r[strtolower($key)]=$v;
+                $r[strtolower($key)] = $v;
             }
-            $r['name']=$r['microred'];
-            $r['code']=$r['codigo_cocadenado'];
-            
+            $r['name'] = $r['microred'];
+            $r['code'] = $r['codigo_cocadenado'];
         }
-        return $request['to']?array('data'=>$results,'size'=>$count):$results;
+        return $request['to'] ? array('data' => $results, 'size' => $count) : $results;
     }
-    
-    function cie_pag($request) {
+
+    function cie_pag($request)
+    {
         global $wpdb;
-        $from=$request['from'];
-        $to=$request['to'];
-        if(!$to)$to=100000;
+        $from = $request['from'];
+        $to = $request['to'];
+        if (!$to) $to = 100000;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM drt_cie d WHERE 1=1 ".
-        ($request->get_param('microred')?("AND Codigo_Cocadenado=".$request->get_param('microred')):"")." ORDER BY Descripcion_Item LIMIT ". $from.', '. $to, ARRAY_A  );
-        if($wpdb->last_error )return t_error();
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM drt_cie d WHERE 1=1 " .
+            ($request->get_param('microred') ? ("AND Codigo_Cocadenado=" . $request->get_param('microred')) : "") . " ORDER BY Descripcion_Item LIMIT " . $from . ', ' . $to, ARRAY_A);
+        if ($wpdb->last_error) return t_error();
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
-        foreach ($results as &$r){
-            foreach ($r as $key => &$value){
-                $r[strtolower($key)]=$r[$key];
+        foreach ($results as &$r) {
+            foreach ($r as $key => &$value) {
+                $r[strtolower($key)] = $r[$key];
             }
-            $r['name']=$r['Descripcion_Item'];
+            $r['name'] = $r['Descripcion_Item'];
         }
-        return $request['to']?array('data'=>$results,'size'=>$count):$results;
+        return $request['to'] ? array('data' => $results, 'size' => $count) : $results;
     }
-    
-    function eess_pag($request) {
+
+    function eess_pag($request)
+    {
         global $wpdb;
-        $from=$request['from'];
-        $to=$request['to'];
-        if(!$to)$to=10000;
+        $from = $request['from'];
+        $to = $request['to'];
+        if (!$to) $to = 10000;
         $wpdb->last_error  = '';
         //$results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred) AS microredCode,codigo_unico as code,Nombre_del_establecimiento AS name,ubigeo, CASE WHEN categoria IN ('I-4', 'II-1' ,'II-2') THEN 1 ELSE 0 END AS type,categoria FROM drt_renipress d WHERE 1=1 AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred) like '02%' ".
         //($request->get_param('microred')?("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='".$request->get_param('microred'))."'":"")." ORDER BY  nombre_del_establecimiento LIMIT ". $from.', '. $to, ARRAY_A  );
-        
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS codigo_cocadenado AS microredCode,codigo_unico as code,Nombre_establecimiento AS name,ubigeo 
-        FROM grupoipe_regexa_ecr.ipress_eess d WHERE 1=1 ".
-        
-        
-        ($request->get_param('microred')?("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='".$request->get_param('microred'))."'":"")." ORDER BY  nombre_establecimiento LIMIT ". $from.', '. $to, ARRAY_A  );
-        if($wpdb->last_error )return t_error();
+        $db = get_option("db_master");
+        if (isset($db)) {
+            $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS codigo_cocadenado AS microredCode,codigo_unico as code,Nombre_establecimiento AS name,ubigeo 
+        FROM $db.ipress_eess d WHERE 1=1 " . ($request->get_param('microred') ? ("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='" . $request->get_param('microred')) . "'" : "") . " ORDER BY  nombre_establecimiento LIMIT " . $from . ', ' . $to, ARRAY_A);
+        } else {
+            $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS codigo_cocadenado AS microredCode,codigo_unico as code,Nombre_establecimiento AS name,ubigeo 
+        FROM grupoipe_regexa_ecr.ipress_eess d WHERE 1=1 " . ($request->get_param('microred') ? ("AND CONCAT(LPAD(codigo_disa, 2, 0),codigo_red,codigo_microrred)='" . $request->get_param('microred')) . "'" : "") . " ORDER BY  nombre_establecimiento LIMIT " . $from . ', ' . $to, ARRAY_A);
+        }
+        if ($wpdb->last_error) return t_error();
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
-        return $request['to']?array('data'=>$results,'size'=>$count):$results;
-
+        return $request['to'] ? array('data' => $results, 'size' => $count) : $results;
     }
-    
-    function api_sivico_search($request){
+
+    function api_sivico_search($request)
+    {
         global $wpdb;
-        $from=$request['from'];
-        $q=$request['query'];
-        $to=$request['to'];
+        $from = $request['from'];
+        $q = $request['query'];
+        $to = $request['to'];
         $wpdb->last_error  = '';
-        $q='%'.($q?str_replace(" ","%",$q):'').'%';
-        $q='%';
+        $q = '%' . ($q ? str_replace(" ", "%", $q) : '') . '%';
+        $q = '%';
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS d.*,sp.*,concat(sp.surnames,sp.names) fullName FROM ds_sivico d 
         LEFT OUTER JOIN ds_sivico_people sp ON sp.master_id=d.id AND sp.canceled=0 where d.canceled=0 
         AND (
@@ -135,20 +140,22 @@ class SivicoController extends Controller
         OR (sp.names is null OR concat(sp.surnames,sp.names) LIKE '$q')
         OR (d.informante is null OR d.informante LIKE '$q')
         )
-        ".($to?" LIMIT $from,$to":''), OBJECT );
-        if($wpdb->last_error )return t_error();
+        " . ($to ? " LIMIT $from,$to" : ''), OBJECT);
+        if ($wpdb->last_error) return t_error();
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
-        return $request['to']?array(
-            'q'=>$q,
-            'sql',"SELECT SQL_CALC_FOUND_ROWS * FROM ds_sivico d 
+        return $request['to'] ? array(
+            'q' => $q,
+            'sql',
+            "SELECT SQL_CALC_FOUND_ROWS * FROM ds_sivico d 
         LEFT OUTER JOIN ds_sivico_people sp ON sp.master_id=d.id AND sp.canceled=0 where d.canceled=0 
         AND (
         (sp.code is null OR sp.code LIKE '$q')
         OR (sp.names is null OR concat(sp.surnames,sp.names) LIKE '$q')
         OR (d.informante is null OR d.informante LIKE '$q')
         )
-        ".($to?" LIMIT $from,$to":''),
-            'data'=>$results,'size'=>$count):$results;
+        " . ($to ? " LIMIT $from,$to" : ''),
+            'data' => $results,
+            'size' => $count
+        ) : $results;
     }
-    
 }
