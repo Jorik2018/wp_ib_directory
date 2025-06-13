@@ -42,7 +42,7 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
-        $db=get_option("db_master")
+        $db=get_option("db_master");
         $results = $wpdb->get_results("SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
         if ($wpdb->last_error) return t_error();
         return $results;
