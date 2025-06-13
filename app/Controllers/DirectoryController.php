@@ -42,12 +42,11 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
-        $db=get_option("db_master");
-        if(isset($db)){
+        $db = get_option("db_master");
+        if (isset($db)) {
             $results = $wpdb->get_results("SELECT d.id,d.name name, d.id code FROM $db.ubigeo_peru_departments d");
-        }else{
+        } else {
             $results = $wpdb->get_results("SELECT d.id_dpto id,d.nombre_dpto name, d.codigo_dpto code FROM drt_departamento d");
-        
         }
         if ($wpdb->last_error) return t_error();
         return $results;
@@ -125,8 +124,14 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT d.nombre_prov name, d.codigo_prov code FROM drt_provincia d" . ($request['regionId'] ? "
+        $db = get_option("db_master");
+        if (isset($db)) {
+            $results = $wpdb->get_results("SELECT d.name name, d.id code FROM $db.ubigeo_peru_provinces d" . ($request['regionId'] ? "
+            WHERE d.department_id LIKE '" . sprintf('%02d', $request['regionId']) . "%'" : ""));
+        } else {
+            $results = $wpdb->get_results("SELECT d.nombre_prov name, d.codigo_prov code FROM drt_provincia d" . ($request['regionId'] ? "
             WHERE d.codigo_prov LIKE '" . sprintf('%02d', $request['regionId']) . "%'" : ""));
+        }
         if ($wpdb->last_error) return t_error();
         return $results;
     }
@@ -135,12 +140,12 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
-        $db=get_option("db_master");
-        if(isset($db)){
-        $results = $wpdb->get_results("SELECT d.name name, d.id code FROM $db.ubigeo_peru_districts d WHERE 
+        $db = get_option("db_master");
+        if (isset($db)) {
+            $results = $wpdb->get_results("SELECT d.name name, d.id code FROM $db.ubigeo_peru_districts d WHERE 
             d.province_id LIKE '" . $request['provinceId'] . "%'");
-        }else{
-        $results = $wpdb->get_results("SELECT d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
+        } else {
+            $results = $wpdb->get_results("SELECT d.nombre_dist name, d.codigo_dist code FROM drt_distrito d WHERE 
             d.codigo_dist LIKE '" . $request['provinceId'] . "%'");
         }
 
