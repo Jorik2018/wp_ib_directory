@@ -315,6 +315,11 @@ if ($wpdb->last_error) {
 }
   $sql = "USE $original_db_name";
   $wpdb->query($sql);
+  if ($wpdb->last_error) {
+    $log_file = __DIR__ . '/error_log_plugin.txt'; // Puedes cambiar la ruta
+    $mensaje = '[' . date('Y-m-d H:i:s') . '] ' . $wpdb->last_error . PHP_EOL;
+    file_put_contents($log_file, $mensaje, FILE_APPEND);
+  }
 }
 
 register_activation_hook(__FILE__, 'directory_install');
