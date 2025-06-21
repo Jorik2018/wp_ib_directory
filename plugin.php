@@ -28,12 +28,11 @@ function directory_install()
   $db = get_option("db_erp");
 
   //$wpdb->prefix .
-  $table_name =  'ds_emed';
   $charset_collate = $wpdb->get_charset_collate();
 
   require_once ABSPATH . 'wp-admin/includes/upgrade.php';
   
-  $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+  $sql = "CREATE TABLE IF NOT EXISTS ds_emed (
         id int NOT NULL AUTO_INCREMENT,
         code varchar(20) DEFAULT NULL,
         offline int DEFAULT NULL,
@@ -79,6 +78,9 @@ function directory_install()
     ) $charset_collate;";
   dbDelta($sql);
 
+  $original_db_name = $wpdb->dbname;
+  $sql = "USE $db";
+  $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS drt_provincia (
         id_pais int NOT NULL,
@@ -93,10 +95,6 @@ function directory_install()
   $wpdb->query($sql);
   //add_option('jal_db_version', $this->version);
 
-  $original_db_name = $wpdb->dbname;
-  $sql = "USE $db";
-  $wpdb->query($sql);
-  
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_action (
           id bigint(20) NOT NULL AUTO_INCREMENT,
           offline bigint(20) DEFAULT NULL,

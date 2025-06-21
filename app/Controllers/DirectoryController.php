@@ -56,10 +56,21 @@ class DirectoryController extends Controller
     {
         global $wpdb;
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
+        $db = get_option("db_master");
+
+        if (isset($db)) {
+            $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
+        Ubigeo_Centropoblado AS codccpp,
+        Nombre_Centro_Poblado AS name FROM $db.ubigeo_peru_ccpp2
+             order by Ubigeo_Distrito,3");
+        } else {
+            $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
         Ubigeo_Centropoblado AS codccpp,
         Nombre_Centro_Poblado AS name FROM drt_ccpp 
-             order by Ubigeo_Distrito,3");
+             order by Ubigeo_Distrito,3");}
+    
+
+
         /*$results = $wpdb->get_results("SELECT 
             concat(ubigeo,codccpp) id,
             codccpp,
