@@ -28,11 +28,12 @@ function directory_install()
   $db = get_option("db_erp");
 
   //$wpdb->prefix .
-  var_dump($db,'========');
   $table_name =  'ds_emed';
   $charset_collate = $wpdb->get_charset_collate();
 
-  $sql = "CREATE TABLE $table_name (
+  require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+  
+  $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id int NOT NULL AUTO_INCREMENT,
         code varchar(20) DEFAULT NULL,
         offline int DEFAULT NULL,
@@ -76,9 +77,6 @@ function directory_install()
         canceled tinyint(1) NOT NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
-
-  require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
   dbDelta($sql);
 
 
@@ -181,7 +179,7 @@ function directory_install()
           user_update varchar(50) DEFAULT NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
-    )";
+    ) $charset_collate;";
 
   $wpdb->query($sql);
 
@@ -204,7 +202,7 @@ function directory_install()
           user_update varchar(50) DEFAULT NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
-      )";
+      ) $charset_collate;";
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_file (
@@ -247,7 +245,7 @@ function directory_install()
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS matm_persona (
-    id int NOT NULL,
+    id int NOT NULL AUTO_INCREMENT,
     nacionalidad varchar(50) DEFAULT NULL,
     ubigeo char(6) DEFAULT NULL,
     ubigeo_ccpp char(4) DEFAULT NULL,
@@ -276,12 +274,13 @@ function directory_install()
     delete_uid int DEFAULT NULL,
     delete_user varchar(100) DEFAULT NULL,
     delete_date datetime DEFAULT NULL,
-    canceled tinyint(1) DEFAULT '0'
-  ) ENGINE=MyISAM";
+    canceled tinyint(1) DEFAULT '0',
+    PRIMARY KEY (id)
+  ) $charset_collate;";
   $wpdb->query($sql);
-      
+
   $sql = "CREATE TABLE IF NOT EXISTS mon_atenciones (
-    id int NOT NULL,
+    id int NOT NULL AUTO_INCREMENT,
     persona_id bigint(20) NOT NULL,
     Codigo_Unico varchar(10) DEFAULT NULL,
     Id_Cita varchar(3) DEFAULT NULL,
@@ -304,8 +303,9 @@ function directory_install()
     delete_uid int DEFAULT NULL,
     delete_user varchar(100) DEFAULT NULL,
     delete_date datetime DEFAULT NULL,
-    canceled tinyint(1) DEFAULT '0'
-  ) ENGINE=InnoDB";
+    canceled tinyint(1) DEFAULT '0',
+    PRIMARY KEY (id)
+  ) $charset_collate;";
   $wpdb->query($sql);
 
   $sql = "USE $original_db_name";
