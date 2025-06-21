@@ -288,7 +288,7 @@ function directory_install()
     Codigo_Item varchar DEFAULT NULL,
     Id_Correlativo_Item int DEFAULT NULL,
     Valor_Lab varchar(3) DEFAULT NULL,
-    Id_Correlativo_Lab int(50) DEFAULT NULL,
+    Id_Correlativo_Lab int DEFAULT NULL,
     Peso decimal(5,2) DEFAULT NULL,
     Talla decimal(5,2) DEFAULT NULL,
     Hemoglobina decimal(4,2) DEFAULT NULL,
