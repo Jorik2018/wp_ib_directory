@@ -61,7 +61,7 @@ class DirectoryController extends Controller
         if (isset($db)) {
             $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
         Ubigeo_Centropoblado AS codccpp,
-        Nombre_Centro_Poblado AS name FROM $db.ubigeo_peru_ccpp2
+        Nombre_Centro_Poblado AS name FROM $db.ubigeo_peru_ccpp
              order by Ubigeo_Distrito,3");
         } else {
             $results = $wpdb->get_results("SELECT distinct Ubigeo_Centropoblado AS id,
