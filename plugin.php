@@ -307,7 +307,11 @@ function directory_install()
     PRIMARY KEY (id)
   ) $charset_collate;";
   $wpdb->query($sql);
-if ($wpdb->last_error) throw new \WP_Error(500,$msg?$msg:$wpdb->last_error, array('status'=>500));
+
+if ($wpdb->last_error) {
+  die($wpdb->last_error);
+  throw new \WP_Error(500,$wpdb->last_error, array('status'=>500));
+}
   $sql = "USE $original_db_name";
   $wpdb->query($sql);
 }
