@@ -285,7 +285,7 @@ function directory_install()
     Codigo_Unico varchar(10) DEFAULT NULL,
     Id_Cita varchar(3) DEFAULT NULL,
     Fecha_Atencion date DEFAULT NULL,
-    Codigo_Item varchar DEFAULT NULL,
+    Codigo_Item varchar(11) DEFAULT NULL,
     Id_Correlativo_Item int DEFAULT NULL,
     Valor_Lab varchar(3) DEFAULT NULL,
     Id_Correlativo_Lab int DEFAULT NULL,
