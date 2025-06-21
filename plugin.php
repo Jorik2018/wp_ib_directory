@@ -90,9 +90,13 @@ function directory_install()
         government_id bigint(20) DEFAULT NULL,
         PRIMARY KEY (id_dpto,id_pais,id_prov)
       )";
-
   $wpdb->query($sql);
+  //add_option('jal_db_version', $this->version);
 
+  $original_db_name = $wpdb->dbname;
+  $sql = "USE $db";
+  $wpdb->query($sql);
+  
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_action (
           id bigint(20) NOT NULL AUTO_INCREMENT,
           offline bigint(20) DEFAULT NULL,
@@ -109,7 +113,6 @@ function directory_install()
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
     )";
-
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_vea_materno (
@@ -236,12 +239,6 @@ function directory_install()
     Fg_Estado varchar(255) DEFAULT NULL,
     PRIMARY KEY (code)
     )";
-  $wpdb->query($sql);
-
-  //add_option('jal_db_version', $this->version);
-
-  $original_db_name = $wpdb->dbname;
-  $sql = "USE $db";
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS matm_persona (
