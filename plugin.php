@@ -24,7 +24,11 @@ Requires PHP: 5.4
 function directory_install()
 {
   global $wpdb;
+
+  $db = get_option("db_erp");
+
   //$wpdb->prefix .
+  var_dump($db,'========');
   $table_name =  'ds_emed';
   $charset_collate = $wpdb->get_charset_collate();
 
@@ -76,6 +80,7 @@ function directory_install()
   require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
   dbDelta($sql);
+
 
   $sql = "CREATE TABLE IF NOT EXISTS drt_provincia (
         id_pais int NOT NULL,
@@ -201,7 +206,7 @@ function directory_install()
           PRIMARY KEY (id)
       )";
   $wpdb->query($sql);
-  
+
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_file (
           id bigint(20) NOT NULL AUTO_INCREMENT,
           offline bigint(20) NOT NULL,
@@ -235,66 +240,72 @@ function directory_install()
     )";
   $wpdb->query($sql);
 
-  $sql = "CREATE TABLE IF NOT EXISTS drt_ccpp (
-    ID int,
-    Ubigeo_Distrito varchar(255) DEFAULT NULL,
-    Ubigeo_Centropoblado varchar(255) DEFAULT NULL,
-    Provincia varchar(255) DEFAULT NULL,
-    Distrito varchar(255) DEFAULT NULL,
-    Nombre_Centro_Poblado varchar(255) DEFAULT NULL,
-    Codigo_Unico varchar(255) DEFAULT NULL,
-    Establecimiento varchar(255) DEFAULT NULL,
-    Micro_Red varchar(255) DEFAULT NULL,
-    Red varchar(255) DEFAULT NULL,
-    Este varchar(255) DEFAULT NULL,
-    Norte varchar(255) DEFAULT NULL,
-    Latitud varchar(255) DEFAULT NULL,
-    Longitud varchar(255) DEFAULT NULL,
-    Ambito varchar(255) DEFAULT NULL,
-    PRIMARY KEY (ID)
-    )";
-  $wpdb->query($sql);
   //add_option('jal_db_version', $this->version);
 
   $original_db_name = $wpdb->dbname;
-
-  $db_name = 'grupoipe_regexa_ecr';
-
-  $sql = "CREATE DATABASE IF NOT EXISTS $db_name";
+  $sql = "USE $db";
   $wpdb->query($sql);
 
-  $sql = "USE $db_name";
+  $sql = "CREATE TABLE IF NOT EXISTS matm_persona (
+    id int NOT NULL,
+    nacionalidad varchar(50) DEFAULT NULL,
+    ubigeo char(6) DEFAULT NULL,
+    ubigeo_ccpp char(4) DEFAULT NULL,
+    documento_tipo varchar(10) NOT NULL,
+    documento_nro varchar(20) NOT NULL,
+    ape_paterno varchar(50) NOT NULL,
+    ape_materno varchar(50) NOT NULL,
+    nombres varchar(100) NOT NULL,
+    estado_civil varchar(20) DEFAULT NULL,
+    ape_casado varchar(50) DEFAULT NULL,
+    sexo char(1) NOT NULL,
+    fecha_nacimiento date NOT NULL,
+    direccion varchar(150) DEFAULT NULL,
+    celular varchar(20) DEFAULT NULL,
+    correo varchar(100) DEFAULT NULL,
+    idioma_predominante varchar(20) DEFAULT NULL,
+    cod_familia varchar(255) DEFAULT NULL,
+    lat varchar(255) DEFAULT NULL,
+    lon varchar(255) DEFAULT NULL,
+    insert_uid int DEFAULT NULL,
+    insert_user varchar(100) DEFAULT NULL,
+    insert_date datetime DEFAULT NULL,
+    update_uid int DEFAULT NULL,
+    update_user varchar(100) DEFAULT NULL,
+    update_date datetime DEFAULT NULL,
+    delete_uid int DEFAULT NULL,
+    delete_user varchar(100) DEFAULT NULL,
+    delete_date datetime DEFAULT NULL,
+    canceled tinyint(1) DEFAULT '0'
+  ) ENGINE=MyISAM";
   $wpdb->query($sql);
-
-  $sql = "CREATE TABLE IF NOT EXISTS ipress_red (
-        ID int DEFAULT NULL,
-        Codigo_Red varchar(255) NOT NULL,
-        Red varchar(255) DEFAULT NULL,
-        PRIMARY KEY (ID)
-      )";
-  $wpdb->query($sql);
-
-  $sql = "CREATE TABLE IF NOT EXISTS ipress_microred (
-        ID  int,
-        codigo_DISA  varchar(2) NOT NULL,
-        Codigo_Red  varchar(255) DEFAULT NULL,
-        Codigo_Microrred  varchar(255) DEFAULT NULL,
-        Codigo_Cocadenado  varchar(255) NOT NULL,
-        Microred  varchar(255) DEFAULT NULL,
-        PRIMARY KEY (ID)
-    )";
-  $wpdb->query($sql);
-
-  $sql = "CREATE TABLE IF NOT EXISTS ipress_eess (
-    ID int(255),
-    Codigo_Red varchar(255) DEFAULT NULL,
-    Codigo_Microred varchar(255) DEFAULT NULL,
-    Codigo_Cocadenado varchar(255) DEFAULT NULL,
-    Codigo_Unico varchar(255) NOT NULL,
-    Nombre_Establecimiento varchar(255) DEFAULT NULL,
-    UBIGEO varchar(255) DEFAULT NULL,
-      PRIMARY KEY (ID)
-    )";
+      
+  $sql = "CREATE TABLE IF NOT EXISTS mon_atenciones (
+    id int NOT NULL,
+    persona_id bigint(20) NOT NULL,
+    Codigo_Unico varchar(10) DEFAULT NULL,
+    Id_Cita varchar(3) DEFAULT NULL,
+    Fecha_Atencion date DEFAULT NULL,
+    Codigo_Item varchar DEFAULT NULL,
+    Id_Correlativo_Item int DEFAULT NULL,
+    Valor_Lab varchar(3) DEFAULT NULL,
+    Id_Correlativo_Lab int(50) DEFAULT NULL,
+    Peso decimal(5,2) DEFAULT NULL,
+    Talla decimal(5,2) DEFAULT NULL,
+    Hemoglobina decimal(4,2) DEFAULT NULL,
+    lat varchar(255) DEFAULT NULL,
+    lon varchar(255) DEFAULT NULL,
+    insert_uid int DEFAULT NULL,
+    insert_user varchar(100) DEFAULT NULL,
+    insert_date datetime DEFAULT NULL,
+    update_uid int DEFAULT NULL,
+    update_user varchar(100) DEFAULT NULL,
+    update_date datetime DEFAULT NULL,
+    delete_uid int DEFAULT NULL,
+    delete_user varchar(100) DEFAULT NULL,
+    delete_date datetime DEFAULT NULL,
+    canceled tinyint(1) DEFAULT '0'
+  ) ENGINE=InnoDB";
   $wpdb->query($sql);
 
   $sql = "USE $original_db_name";

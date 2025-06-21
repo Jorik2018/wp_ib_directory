@@ -48,9 +48,35 @@ class CancerController extends Controller
         );
     }
 
+    public function cars($request){    
+        return array('value'=>isset($request['model'])?$request['model']:"x",
+    'b'=>isset($request['b'])?$request['b']:"x2");
+    }
+
     public function rest_api_init()
     {
- 
+
+        //"cars/(?P<from>)"
+  
+        //fail
+        //register_rest_route( 'myplugin/v1',"cars/(?P<model>[A-Za-z0-9]+)?", array(
+
+
+//?  (?P<model>[A-Za-z0-9\-\_]+)  ?  
+//(/  (?P<' . $match . '>[A-Za-z0-9\-\_]+)  )?
+
+        /*register_rest_route( 'myplugin/v1',"cars(/(?P<model>[A-Za-z0-9\-\_]+))?(/(?P<b>[A-Za-z0-9\-\_]+))?", array(
+            'methods' => 'GET',
+            'callback' => array($this,'cars')
+        ));*/
+
+        //fail.  cars-n(\/(?P<model>[a-z]{10})
+        //ok     cars-n/(?P<model>[a-z]{10})
+/*register_rest_route( 'myplugin/v1',"cars-n(\/(?P<model>[a-z]{10}))", array(
+            'methods' => 'GET',
+            'callback' => array($this,'cars')
+        ));*/
+
         register_rest_route( 'api/desarrollo-social','/cancer', array(
             'methods' => 'POST',
             'callback' => array($this,'post')
