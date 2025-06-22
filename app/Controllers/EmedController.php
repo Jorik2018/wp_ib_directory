@@ -410,7 +410,6 @@ class EmedController extends Controller
             [
                 'establecimiento_salud',
                 'codigo_EESS',
-                'codigo_CCPP',
                 'emergency_red',
                 'emergency_microred',
                 'descripcion_sector',
@@ -442,10 +441,8 @@ class EmedController extends Controller
         }
         cfield($o, 'codigoEESS', 'codigo_EESS');
         unset($o['codigo_eess']);
-        cfield($o, 'codigoCCPP', 'codigo_CCPP');
-        cfield($o, 'codigo_ccpp', 'codigo_CCPP');
         unset($o['codigo_ccpp']);
-
+        cfield($o, 'codigoCCPP', 'codigo_ccpp');
         cdfield($o, 'gestante_FUR');
         cdfield($o, 'gestante_FPP');
         cdfield($o, 'lugar_fecha_emergencia');
