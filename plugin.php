@@ -130,11 +130,11 @@ function directory_install()
           updated_date datetime DEFAULT NULL,
           user_register varchar(255) DEFAULT NULL,
           user_modificacion varchar(50) DEFAULT NULL,
-          canceled` tinyint(1) NOT NULL DEFAULT '0',
+          canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
   ) $charset_collate;";
   $wpdb->query($sql);
-  
+
   //add_option('jal_db_version', $this->version);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_action (
