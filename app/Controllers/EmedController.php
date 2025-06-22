@@ -631,6 +631,7 @@ class EmedController extends Controller
         $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed WHERE id=" . $id), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         $current_user = wp_get_current_user();
+        cfield($o, 'codigo_ccpp', 'codigoCCPP');
         $o['editable'] = $o['uid_insert'] == $current_user->ID;
         $o['files'] = $this->file_pag(array("emed" => $o['id']));
         $o['action'] = $this->action_pag(array("emed" => $o['id']));
