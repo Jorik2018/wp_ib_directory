@@ -31,7 +31,7 @@ function directory_install()
   $charset_collate = $wpdb->get_charset_collate();
 
   require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-  
+
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed (
         id int NOT NULL AUTO_INCREMENT,
         code varchar(20) DEFAULT NULL,
@@ -82,17 +82,59 @@ function directory_install()
   $sql = "USE $db";
   $wpdb->query($sql);
 
-  $sql = "CREATE TABLE IF NOT EXISTS drt_provincia (
-        id_pais int NOT NULL,
-        id_dpto int NOT NULL,
-        id_prov int NOT NULL,
-        nombre_prov varchar(100) NOT NULL,
-        abreviatura_prov varchar(30) DEFAULT NULL,
-        codigo_prov varchar(4) DEFAULT NULL,
-        government_id bigint(20) DEFAULT NULL,
-        PRIMARY KEY (id_dpto,id_pais,id_prov)
-      )";
+  $sql = "CREATE TABLE IF NOT EXISTS ds_gestante (
+          id bigint(20) NOT NULL AUTO_INCREMENT,
+          `offline` bigint(20) DEFAULT NULL,
+          red varchar(255) DEFAULT NULL,
+          microred varchar(255) DEFAULT NULL,
+          establecimiento_salud varchar(255) DEFAULT NULL,
+          codigo_eess varchar(255) DEFAULT NULL,
+          region varchar(255) DEFAULT NULL,
+          province varchar(255) DEFAULT NULL,
+          district varchar(255) DEFAULT NULL,
+          ccpp varchar(255) DEFAULT NULL,
+          codigo_ccpp varchar(255) DEFAULT NULL,
+          sector varchar(255) DEFAULT NULL,
+          `address` varchar(255) DEFAULT NULL,
+          numero_dni varchar(255) DEFAULT NULL,
+          apellido_paterno varchar(80) NOT NULL,
+          apellido_materno varchar(80) NOT NULL DEFAULT '-',
+          nombres varchar(255) DEFAULT NULL,
+          fecha_nacimiento date DEFAULT NULL,
+          estado_civil varchar(255) DEFAULT NULL,
+          grado_instruccion varchar(255) DEFAULT NULL,
+          gestante_numero_celular varchar(255) DEFAULT NULL,
+          gestante_familia_celular varchar(255) DEFAULT NULL,
+          gestante_numero varchar(255) DEFAULT NULL,
+          gestante_paridad varchar(255) DEFAULT NULL,
+          gestante_fur date DEFAULT NULL,
+          gestante_fpp date DEFAULT NULL,
+          gestante_edad_gestacional_semanas varchar(255) DEFAULT NULL,
+          gestante_riesgo_obstetrico varchar(255) DEFAULT NULL,
+          emergency_microred varchar(6) DEFAULT NULL,
+          emergency_red varchar(2) DEFAULT NULL,
+          lugar_ipress varchar(255) DEFAULT NULL,
+          lugar_diagnostico varchar(255) DEFAULT NULL,
+          lugar_fecha_emergencia date DEFAULT NULL,
+          lugar_fecha_referida date DEFAULT NULL,
+          migra_red varchar(6) DEFAULT NULL,
+          migra_microred varchar(6) DEFAULT NULL,
+          migracion_ipress varchar(255) DEFAULT NULL,
+          migracion_observacion varchar(255) DEFAULT NULL,
+          migracion_estado varchar(255) DEFAULT NULL,
+          migracion_fecha date DEFAULT NULL,
+          lon double DEFAULT NULL,
+          lat double DEFAULT NULL,
+          uid_insert int DEFAULT NULL,
+          uid_update int DEFAULT NULL,
+          updated_date datetime DEFAULT NULL,
+          user_register varchar(255) DEFAULT NULL,
+          user_modificacion varchar(50) DEFAULT NULL,
+          canceled` tinyint(1) NOT NULL DEFAULT '0',
+          PRIMARY KEY (id)
+  ) $charset_collate;";
   $wpdb->query($sql);
+  
   //add_option('jal_db_version', $this->version);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_action (
@@ -110,7 +152,7 @@ function directory_install()
           user_update varchar(50) DEFAULT NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
-    )";
+  )";
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_vea_materno (
@@ -303,11 +345,11 @@ function directory_install()
   ) $charset_collate;";
   $wpdb->query($sql);
 
-if ($wpdb->last_error) {
-  $log_file = __DIR__ . '/error_log_plugin.txt'; // Puedes cambiar la ruta
-  $mensaje = '[' . date('Y-m-d H:i:s') . '] ' . $wpdb->last_error . PHP_EOL;
-  file_put_contents($log_file, $mensaje, FILE_APPEND);
-}
+  if ($wpdb->last_error) {
+    $log_file = __DIR__ . '/error_log_plugin.txt'; // Puedes cambiar la ruta
+    $mensaje = '[' . date('Y-m-d H:i:s') . '] ' . $wpdb->last_error . PHP_EOL;
+    file_put_contents($log_file, $mensaje, FILE_APPEND);
+  }
   $sql = "USE $original_db_name";
   $wpdb->query($sql);
   if ($wpdb->last_error) {
