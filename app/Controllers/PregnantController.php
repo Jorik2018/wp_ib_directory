@@ -229,7 +229,8 @@ class PregnantController extends Controller
     public function get($request)
     {
         global $wpdb;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM ds_gestante e WHERE e.id=" . $request['id']), ARRAY_A);
+        $db = get_option("db_erp");
+        $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM $db.ds_gestante e WHERE e.id=" . $request['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         foreach (
             [
