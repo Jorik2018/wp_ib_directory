@@ -135,8 +135,27 @@ function directory_install()
   ) $charset_collate;";
   $wpdb->query($sql);
 
-  //add_option('jal_db_version', $this->version);
+  $sql = "CREATE TABLE IF NOT EXISTS ds_gestante_visita (
+          id int NOT NULL AUTO_INCREMENT,
+          `offline` bigint(20) DEFAULT NULL,
+          gestante_id int NOT NULL,
+          numero_visita int DEFAULT NULL,
+          fecha_visita datetime NOT NULL,
+          fecha_prox_visita date DEFAULT NULL,
+          detalle varchar(255) DEFAULT NULL,
+          user_register varchar(255) DEFAULT NULL,
+          `uid` int NOT NULL,
+          `lat` double DEFAULT NULL,
+          `lon` double DEFAULT NULL,
+          updated_date datetime DEFAULT NULL,
+          inserted_date datetime NOT NULL,
+          `type` varchar(2) DEFAULT NULL,
+          canceled tinyint(1) NOT NULL DEFAULT '0',
+          PRIMARY KEY (id)
+  ) $charset_collate;";
+  $wpdb->query($sql);
 
+  //add_option('jal_db_version', $this->version);
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_action (
           id bigint(20) NOT NULL AUTO_INCREMENT,
           offline bigint(20) DEFAULT NULL,
@@ -152,7 +171,7 @@ function directory_install()
           user_update varchar(50) DEFAULT NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
-  )";
+  ) $charset_collate;";
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_vea_materno (
@@ -201,7 +220,7 @@ function directory_install()
 
           canceled bit(1) DEFAULT 0,
           PRIMARY KEY (id)
-    )";
+    ) $charset_collate;";
   $wpdb->query($sql);
 
   $sql = "CREATE TABLE IF NOT EXISTS ds_emed_damage_ipress (
