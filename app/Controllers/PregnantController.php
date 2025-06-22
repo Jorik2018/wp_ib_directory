@@ -180,6 +180,10 @@ class PregnantController extends Controller
             $o['migracion_fecha'] = current_time('mysql', 1);
         }
         $inserted = false;
+        $original_db = $wpdb->dbname;
+        $db = get_option("db_erp");
+        $wpdb->select($db);
+
         $wpdb->query('START TRANSACTION');
         if ($o['id'] > 0) {
             $o['user_register'] = $current_user->user_login;
@@ -218,6 +222,7 @@ class PregnantController extends Controller
             $o['visits'] = $visits;
         }
         $wpdb->query('COMMIT');
+        $wpdb->select($original_db);
         return $o;
     }
 
@@ -326,12 +331,10 @@ class PregnantController extends Controller
         $from = $request['from'];
         $to = $request['to'];
         $gestanteId = (!is_array($request) && method_exists($request, 'get_param')) ? $request->get_param('gestanteId') : $request['gestanteId'];
-
-
-
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM ds_gestante_visita d Where canceled=0 " . ($gestanteId ? "AND gestante_id=$gestanteId" : "") . " ORDER BY id desc " . ($to ? "LIMIT " . $from . ', ' . $to : ""), ARRAY_A);
+        $erp = get_option("db_erp");
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS * FROM $erp.ds_gestante_visita d Where canceled=0 " . ($gestanteId ? "AND gestante_id=$gestanteId" : "") . " ORDER BY id desc " . ($to ? "LIMIT " . $from . ', ' . $to : ""), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         foreach ($results as &$r) {
             cfield($r, 'fecha_visita', 'fechaVisita');
@@ -347,7 +350,11 @@ class PregnantController extends Controller
     public function delete($data)
     {
         global $wpdb;
+        $original_db = $wpdb->dbname;
+        $db = get_option("db_erp");
+        $wpdb->select($db);
         $row = $wpdb->update('ds_gestante', array('canceled' => 1), array('id' => $data['id']));
+        $wpdb->select($original_db);
         return $row;
     }
 
@@ -400,10 +407,9 @@ class PregnantController extends Controller
     function visit_get($data)
     {
         global $wpdb;
-        //$data=method_exists($data,'get_params')?$data->get_params():$data;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_gestante_visita WHERE id=" . $data['id']), ARRAY_A);
+        $db = get_option("db_erp");
+        $o = $wpdb->get_row($wpdb->prepare("SELECT o.*, o.fecha_visita fechaVisita FROM $db.ds_gestante_visita o WHERE id=" . $data['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
-        cfield($o, 'fecha_visita', 'fechaVisita');
         cdfield($o, 'fechaProxVisita');
         cfield($o, 'fecha_prox_visita', 'fechaProxVisita');
         cfield($o, 'numero_visita', 'number');
