@@ -29,7 +29,7 @@ class EmedController extends Controller
                 'EMED_READ' => true
             )
         );
-        
+
         add_role(
             'emed_admin',
             'emed_admin',
@@ -236,7 +236,8 @@ class EmedController extends Controller
     function damage_salud_get($data)
     {
         global $wpdb;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed_damage_salud WHERE id=" . $data['id']), ARRAY_A);
+        $db = get_option("db_master");
+        $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM $db.ds_emed_damage_salud e WHERE e.id=" . $data['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         cfield($o, 'emed_id', 'emedId');
         return $o;
@@ -245,23 +246,32 @@ class EmedController extends Controller
     function damage_salud_delete($data)
     {
         global $wpdb;
+        $original_db = $wpdb->dbname;
+        $db = get_option("db_erp");
+        $wpdb->select($db);
         $row = $wpdb->update('ds_emed_damage_salud', array('canceled' => 1), array('id' => $data['id']));
+        $wpdb->select($original_db);
         return $row;
     }
 
     function damage_ipress_get($data)
     {
         global $wpdb;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_emed_damage_ipress WHERE id=" . $data['id']), ARRAY_A);
+        $db = get_option("db_erp");
+        $o = $wpdb->get_row($wpdb->prepare("SELECT e.*,e.emed_id emedId FROM $db.ds_emed_damage_ipress e WHERE id=" . $data['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
-        cfield($o, 'emed_id', 'emedId');
+        unset($o['emed_id']);
         return $o;
     }
 
     function damage_ipress_delete($data)
     {
         global $wpdb;
+        $original_db = $wpdb->dbname;
+        $db = get_option("db_erp");
+        $wpdb->select($db);
         $row = $wpdb->update('ds_emed_damage_ipress', array('canceled' => 1), array('id' => $data['id']));
+        $wpdb->select($original_db);
         return $row;
     }
 
@@ -385,7 +395,7 @@ class EmedController extends Controller
 
         if ($wpdb->last_error) return t_error();
         foreach ($results as &$r) {
-            $r['editable']=(bool) $r['editable'];
+            $r['editable'] = (bool) $r['editable'];
             cfield($r, 'numero_dni', 'numeroDNI');
             cfield($r, 'estado_civil', 'estadoCivil');
             cfield($r, 'emergency_microred', 'emergencyMicrored');
@@ -627,7 +637,7 @@ class EmedController extends Controller
     function get($data)
     {
         global $wpdb;
-        $id = get_param($data,'id');
+        $id = get_param($data, 'id');
         $o = $wpdb->get_row($wpdb->prepare("SELECT e.*, e.codigo_ccpp codigoCCPP FROM ds_emed e  WHERE e.id=" . $id), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         $current_user = wp_get_current_user();
@@ -688,5 +698,4 @@ class EmedController extends Controller
         if ($wpdb->last_error) return t_error();
         return $to > 0 ? array('data' => $results, 'size' => $wpdb->get_var('SELECT FOUND_ROWS()')) : $results;
     }
-
 }

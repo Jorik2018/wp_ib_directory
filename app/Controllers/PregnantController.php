@@ -181,7 +181,7 @@ class PregnantController extends Controller
         if($visits){
             foreach($visits as $key=>&$visit){
                 $visit['pregnantId']=$o['id'];
-                $visits[$key]=visit_post($visit);
+                $visits[$key]=$this->visit_post($visit);
             }
             $o['visits']=$visits;
         }
@@ -198,8 +198,7 @@ class PregnantController extends Controller
 
     public function get($request){    
         global $wpdb;
-        //$data=method_exists($data,'get_params')?$data->get_params():$data;
-        $o = $wpdb->get_row($wpdb->prepare("SELECT * FROM ds_gestante WHERE id=".$request['id']),ARRAY_A);
+        $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM ds_gestante e WHERE e.id=".$request['id']),ARRAY_A);
         if($wpdb->last_error )return t_error();
         foreach(['establecimiento_salud', 'codigo_EESS', 'codigo_CCPP','emergency_red','emergency_microred' ,'descripcion_sector', 'descripcion_direccion', 'numero_DNI', 'apellido_paterno',
         'apellido_materno', 'fecha_nacimiento', 'estado_civil', 'grado_instruccion', 'gestante_numero_celular', 'gestante_familia_celular', 
@@ -223,7 +222,7 @@ class PregnantController extends Controller
 
     
     public function pag($request){
-        global $wpdb;$edb=2;
+        global $wpdb;
         $from=$request['from'];
         $to=$request['to'];
         $numeroDNI=method_exists($request,'get_param')?$request->get_param('numeroDNI'):$request['numeroDNI'];
@@ -233,11 +232,19 @@ class PregnantController extends Controller
         $microredName=method_exists($request,'get_param')?$request->get_param('microredName'):$request['microredName'];
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-    
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,r.red as nameRed,mr.microred as nameMicroRed,COUNT(v.id) AS visits FROM ds_gestante g ".
-            "LEFT JOIN ds_gestante_visita v ON v.gestante_id=g.id 
-            LEFT JOIN grupoipe_master.ipress_red r ON r.codigo_red=g.red
-            LEFT JOIN grupoipe_master.ipress_microred mr ON mr.codigo_cocadenado=g.microred
+        $erp = get_option("db_erp");
+        $master = get_option("db_master");
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*,
+            g.numero_dni numeroDNI,
+            g.estado_civil estadoCivil,
+            g.grado_instruccion gradoInstruccion,
+            g.emergency_microred emergencyMicrored,
+            r.red as nameRed,
+            mr.microred as nameMicroRed,
+            COUNT(v.id) AS visits FROM $erp.ds_gestante g 
+            LEFT JOIN $erp.ds_gestante_visita v ON v.gestante_id=g.id 
+            LEFT JOIN $master.ipress_red r ON r.codigo_red=g.red
+            LEFT JOIN $master.ipress_microred mr ON mr.codigo_cocadenado=g.microred
             WHERE g.canceled=0 ".(isset($numeroDNI)?" AND g.numero_dni like '%$numeroDNI%' ":"")
                 .(isset($fullName)?" AND CONCAT(g.apellido_paterno,g.apellido_materno,g.nombres) like '%$fullName%' ":"")
                 .(isset($red)?" AND g.red like '%$red%' ":"")
@@ -248,12 +255,8 @@ class PregnantController extends Controller
         
         if($wpdb->last_error )return t_error();
         foreach ($results as &$r){
-            cfield($r,'numero_dni','numeroDNI');
             if(isset($r['nameRed']))$r['red']=array('code'=>$r['red'],'name'=>$r['nameRed']);
-            if(isset($r['nameMicroRed']))$r['microred']=array('code'=>$r['microred'],'name'=>$r['nameMicroRed']);
-            cfield($r,'estado_civil','estadoCivil');
-            cfield($r,'emergency_microred','emergencyMicrored');
-            cfield($r,'grado_instruccion','gradoInstruccion');
+            if(isset($r['nameMicroRed']))$r['microred']=array('code'=>$r['microred'],'name'=>$r['nameMicroRed']);    
         }
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
         if($wpdb->last_error )return t_error();
@@ -296,7 +299,6 @@ class PregnantController extends Controller
         $o=method_exists($request,'get_params')?$request->get_params():$request;
         $current_user = wp_get_current_user();
         cdfield($o,'fechaVisita');
-        
         cfield($o,'pregnantId','gestante_id');
         cfield($o,'fechaVisita','fecha_visita');
         cfield($o,'number','numero_visita');
