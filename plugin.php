@@ -130,6 +130,9 @@ function directory_install()
           updated_date datetime DEFAULT NULL,
           user_register varchar(255) DEFAULT NULL,
           user_modificacion varchar(50) DEFAULT NULL,
+          delete_uid int DEFAULT NULL,
+          delete_user varchar(100) DEFAULT NULL,
+          delete_date datetime DEFAULT NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
   ) $charset_collate;";
@@ -150,6 +153,9 @@ function directory_install()
           updated_date datetime DEFAULT NULL,
           inserted_date datetime NOT NULL,
           `type` varchar(2) DEFAULT NULL,
+          delete_uid int DEFAULT NULL,
+          delete_user varchar(100) DEFAULT NULL,
+          delete_date datetime DEFAULT NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
   ) $charset_collate;";
