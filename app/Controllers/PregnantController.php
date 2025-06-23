@@ -422,7 +422,8 @@ class PregnantController extends Controller
     function visit_number_get($request)
     {
         global $wpdb;
-        $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM ds_gestante_visita WHERE gestante_id=" . $request['pregnant']), ARRAY_A);
+        $erp = get_option("db_erp");
+        $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM $erp.ds_gestante_visita WHERE gestante_id=" . $request['pregnant']), ARRAY_A);
         return $max['max'];
     }
 }
