@@ -380,7 +380,10 @@ class EmedController extends Controller
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
         $erp = get_option("db_erp");
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*, g.codigo_ccpp codigoCCPP, (g.uid_insert = $current_user->ID) AS editable FROM $erp.ds_emed g " .
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*, 
+        g.codigo_ccpp codigoCCPP,
+        g.numero_dni numeroDNI, 
+        g.estado_civil estadoCivil, (g.uid_insert = $current_user->ID) AS editable FROM $erp.ds_emed g " .
             "WHERE g.canceled=0 " .
             (isset($numeroDNI) ? " AND g.numero_dni like '%$numeroDNI%' " : "") .
             (isset($category) ? " AND g.category like '%$category%' " : "") .
@@ -397,8 +400,6 @@ class EmedController extends Controller
         if ($wpdb->last_error) return t_error();
         foreach ($results as &$r) {
             $r['editable'] = (bool) $r['editable'];
-            cfield($r, 'numero_dni', 'numeroDNI');
-            cfield($r, 'estado_civil', 'estadoCivil');
             cfield($r, 'emergency_microred', 'emergencyMicrored');
             cfield($r, 'grado_instruccion', 'gradoInstruccion');
         }
@@ -467,7 +468,11 @@ class EmedController extends Controller
         $damage_salud = remove($o, 'damage_salud');
         remove($o, 'files');
         $inserted = false;
+        $erp = get_option("db_erp");
+        $original_db = $wpdb->dbname;
+        $wpdb->select($erp);
         $wpdb->query('START TRANSACTION');
+        
         if ($o['id'] > 0) {
             $o['update_date'] = current_time('mysql', 1);
             $o['user_update'] = $current_user->user_login;
@@ -521,6 +526,7 @@ class EmedController extends Controller
             $o['damage_salud'] = $damage_salud;
         }
         $wpdb->query('COMMIT');
+        $wpdb->select($original_db);
         return $o;
     }
 
@@ -534,6 +540,9 @@ class EmedController extends Controller
         $tmpId = remove($o, 'tmpId');
         unset($o['synchronized']);
         $inserted = 0;
+        $erp = get_option("db_erp");
+        $original_db = $wpdb->dbname;
+        $wpdb->select($erp);
         if ($o['id'] > 0) {
             $o['uid_update'] = $current_user->ID;
             $o['user_update'] = $current_user->user_login;
@@ -549,6 +558,7 @@ class EmedController extends Controller
             $o['id'] = $wpdb->insert_id;
             $inserted = 1;
         }
+        $wpdb->select($original_db);
         if (false === $updated) return t_error();
         if ($tmpId) {
             $o['tmpId'] = $tmpId;
@@ -567,6 +577,9 @@ class EmedController extends Controller
         $tmpId = remove($o, 'tmpId');
         unset($o['synchronized']);
         $inserted = 0;
+        $erp = get_option("db_erp");
+        $original_db = $wpdb->dbname;
+        $wpdb->select($erp);
         if ($o['id'] > 0) {
             $o['uid_update'] = $current_user->ID;
             $o['user_update'] = $current_user->user_login;
@@ -582,6 +595,7 @@ class EmedController extends Controller
             $o['id'] = $wpdb->insert_id;
             $inserted = 1;
         }
+        $wpdb->select($original_db);
         if (false === $updated) return t_error();
         if ($tmpId) {
             $o['tmpId'] = $tmpId;
@@ -600,6 +614,9 @@ class EmedController extends Controller
         $tmpId = remove($o, 'tmpId');
         unset($o['synchronized']);
         $inserted = 0;
+        $erp = get_option("db_erp");
+        $original_db = $wpdb->dbname;
+        $wpdb->select($erp);
         if ($o['id'] > 0) {
             $o['uid_update'] = $current_user->ID;
             $o['user_update'] = $current_user->user_login;
@@ -615,6 +632,7 @@ class EmedController extends Controller
             $o['id'] = $wpdb->insert_id;
             $inserted = 1;
         }
+        $wpdb->select($original_db);
         if (false === $updated) return t_error();
         if ($tmpId) {
             $o['tmpId'] = $tmpId;
