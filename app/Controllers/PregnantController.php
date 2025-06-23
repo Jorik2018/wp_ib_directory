@@ -129,7 +129,6 @@ class PregnantController extends Controller
             [
                 'establecimiento_salud',
                 'codigo_EESS',
-                'codigo_CCPP',
                 'emergency_red',
                 'emergency_microred',
                 'descripcion_sector',
@@ -163,6 +162,7 @@ class PregnantController extends Controller
             cfield($o, camelCase($k), $k);
         }
         cfield($o, 'codigoEESS', 'codigo_EESS');
+        cfield($o, 'codigoCCPP', 'codigo_ccpp');
         unset($o['codigo_eess']);
 
         cdfield($o, 'gestante_FUR');
