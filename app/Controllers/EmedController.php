@@ -628,7 +628,11 @@ class EmedController extends Controller
         $current_user = wp_get_current_user();
         if ($current_user->has_cap('EMED_ADMIN')) {
             global $wpdb;
+            $erp = get_option("db_erp");
+            $original_db = $wpdb->dbname;
+            $wpdb->select($erp);
             $row = $wpdb->update('ds_emed', array('canceled' => 1), array('id' => $data['id']));
+            $wpdb->select($original_db);
             return $row;
         } else {
             return new WP_Error('rest_forbidden', __('Unauthorized'));
