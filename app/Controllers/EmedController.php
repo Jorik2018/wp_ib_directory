@@ -682,7 +682,8 @@ class EmedController extends Controller
         $emed = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM ds_emed_damage_ipress o " .
+        $erp = get_option("db_erp");
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM $erp.ds_emed_damage_ipress o " .
             "WHERE o.canceled=0 " . (isset($emed) ? " AND o.emed_id like '$emed' " : "") .
             "ORDER BY o.id DESC " .
             ($to > 0 ? ("LIMIT " . $from . ', ' . $to) : ""), ARRAY_A);
@@ -699,7 +700,8 @@ class EmedController extends Controller
         $emed = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM ds_emed_damage_salud g " .
+        $erp = get_option("db_erp");
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM $erp.ds_emed_damage_salud g " .
             "WHERE g.canceled=0 " . (isset($emed) ? " AND g.emed_id like '$emed' " : "") .
             ($to > 0 ? ("LIMIT " . $from . ', ' . $to) : ""), ARRAY_A);
         if ($wpdb->last_error) return t_error();
