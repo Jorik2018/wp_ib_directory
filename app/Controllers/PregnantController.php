@@ -362,6 +362,9 @@ class PregnantController extends Controller
     function visit_post(&$request)
     {
         global $wpdb;
+        $original_db = $wpdb->dbname;
+        $erp = get_option("db_erp");
+        $wpdb->select($erp);
         $o = method_exists($request, 'get_params') ? $request->get_params() : $request;
         $current_user = wp_get_current_user();
         cdfield($o, 'fechaVisita');
@@ -400,7 +403,7 @@ class PregnantController extends Controller
             $o['tmpId'] = $tmpId;
             $o['synchronized'] = 1;
         }
-
+        $wpdb->select($original_db);
         cfield($o, 'numero_visita', 'numeroVisita');
         return $o;
     }
