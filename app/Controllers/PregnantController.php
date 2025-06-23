@@ -97,6 +97,11 @@ class PregnantController extends Controller
             'methods' => 'POST',
             'callback' => array($this, 'visit_post')
         ));
+
+        register_rest_route('api/desarrollo-social', 'pregnant/visit/(?P<ids>[0-9,]+)', array(
+            'methods' => 'DELETE',
+            'callback' => array($this, 'visit_delete')
+        ));
     }
 
     function bulk($request)
@@ -429,4 +434,26 @@ class PregnantController extends Controller
         $max = $wpdb->get_row($wpdb->prepare("SELECT ifnull(max(`numero_visita`),0)+1 AS max FROM $erp.ds_gestante_visita WHERE gestante_id=" . $request['pregnant']), ARRAY_A);
         return $max['max'];
     }
+
+    function visit_delete($data)
+    {
+        global $wpdb;
+        $original_db = $wpdb->dbname;
+        $current_user = wp_get_current_user();
+        $db = get_option("db_erp");
+        $wpdb->select($db);
+        $wpdb->query('START TRANSACTION');
+        $result = array_map(function ($id) use ($wpdb, $current_user) {
+            return $wpdb->update('ds_gestante_visita', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['ids']));
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
+        $wpdb->select($original_db);
+        return $success;
+    }
+
 }
