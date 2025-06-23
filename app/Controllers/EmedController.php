@@ -383,9 +383,11 @@ class EmedController extends Controller
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*, 
         g.codigo_ccpp codigoCCPP,
         g.numero_dni numeroDNI, 
+        g.emergency_microred emergencyMicrored,
+        g.grado_instruccion gradoInstruccion,
         g.estado_civil estadoCivil, (g.uid_insert = $current_user->ID) AS editable FROM $erp.ds_emed g " .
             "WHERE g.canceled=0 " .
-            (isset($numeroDNI) ? " AND g.numero_dni like '%$numeroDNI%' " : "") .
+            (isset($numeroDNI) ? " AND g.numeroDNI like '%$numeroDNI%' " : "") .
             (isset($category) ? " AND g.category like '%$category%' " : "") .
             ($description  ? " AND g.description  like '%" . str_replace(' ', '%', $description) . "%' " : "") .
             ($type ? " AND g.type like '%$type%' " : "") .
@@ -400,8 +402,6 @@ class EmedController extends Controller
         if ($wpdb->last_error) return t_error();
         foreach ($results as &$r) {
             $r['editable'] = (bool) $r['editable'];
-            cfield($r, 'emergency_microred', 'emergencyMicrored');
-            cfield($r, 'grado_instruccion', 'gradoInstruccion');
         }
         $count = $wpdb->get_var('SELECT FOUND_ROWS()');
         if ($wpdb->last_error) return t_error();
