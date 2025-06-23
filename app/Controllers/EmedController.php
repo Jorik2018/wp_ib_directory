@@ -380,10 +380,7 @@ class EmedController extends Controller
         $wpdb->last_error  = '';
         $erp = get_option("db_erp");
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*, 
-        g.codigo_ccpp codigoCCPP,
-        g.emergency_microred emergencyMicrored,
-        g.grado_instruccion gradoInstruccion,
-        g.estado_civil estadoCivil, (g.uid_insert = $current_user->ID) AS editable FROM $erp.ds_emed g " .
+        g.codigo_ccpp codigoCCPP, (g.uid_insert = $current_user->ID) AS editable FROM $erp.ds_emed g " .
             "WHERE g.canceled=0 " .
             (isset($category) ? " AND g.category like '%$category%' " : "") .
             ($description  ? " AND g.description  like '%" . str_replace(' ', '%', $description) . "%' " : "") .
