@@ -379,7 +379,8 @@ class EmedController extends Controller
         $detail = get_param($request, 'detail');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*, g.codigo_ccpp codigoCCPP, (g.uid_insert = $current_user->ID) AS editable FROM ds_emed g " .
+        $erp = get_option("db_master");
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.*, g.codigo_ccpp codigoCCPP, (g.uid_insert = $current_user->ID) AS editable FROM $erp.ds_emed g " .
             "WHERE g.canceled=0 " .
             (isset($numeroDNI) ? " AND g.numero_dni like '%$numeroDNI%' " : "") .
             (isset($category) ? " AND g.category like '%$category%' " : "") .
@@ -658,7 +659,8 @@ class EmedController extends Controller
         $emed_id = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM ds_emed_action o " .
+        $erp = get_option("db_master");
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM $erp.ds_emed_action o " .
             "WHERE o.canceled=0 " . (isset($emed_id) ? " AND o.emed_id=$emed_id " : "") .
             "ORDER BY o.id DESC " .
             ($to > 0 ? ("LIMIT " . $from . ', ' . $to) : ""), ARRAY_A);
