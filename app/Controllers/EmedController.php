@@ -660,7 +660,7 @@ class EmedController extends Controller
         $emed_id = get_param($request, 'emed');
         $current_user = wp_get_current_user();
         $wpdb->last_error  = '';
-        $erp = get_option("db_master");
+        $erp = get_option("db_erp");
         $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS o.* FROM $erp.ds_emed_action o " .
             "WHERE o.canceled=0 " . (isset($emed_id) ? " AND o.emed_id=$emed_id " : "") .
             "ORDER BY o.id DESC " .
