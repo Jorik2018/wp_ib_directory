@@ -639,7 +639,8 @@ class EmedController extends Controller
     {
         global $wpdb;
         $id = get_param($data, 'id');
-        $o = $wpdb->get_row($wpdb->prepare("SELECT e.*, e.codigo_ccpp codigoCCPP FROM ds_emed e  WHERE e.id=" . $id), ARRAY_A);
+        $erp = get_option("db_erp");
+        $o = $wpdb->get_row($wpdb->prepare("SELECT e.*, e.codigo_ccpp codigoCCPP FROM $erp.ds_emed e  WHERE e.id=" . $id), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         $current_user = wp_get_current_user();
         unset($o['codigo_ccpp']);
