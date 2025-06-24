@@ -287,9 +287,9 @@ function directory_install()
           offline bigint(20) NOT NULL,
           emed_id bigint(20) NOT NULL,
           src varchar(100) NULL,
-          uid_insert int NOT NULL,
+          insert_uid int NOT NULL,
           insert_date int NOT NULL,
-          user_insert varchar(50) NULL,
+          insert_user varchar(50) NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
       )";
