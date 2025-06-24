@@ -361,7 +361,7 @@ class EmedController extends Controller
         return $to > 0 ? array('data' => $results, 'size' => $wpdb->get_var('SELECT FOUND_ROWS()')) : $results;
     }
 
-    function file_delete($data)
+        function damage_salud_delete($data)
     {
         global $wpdb;
         $original_db = $wpdb->dbname;
@@ -370,7 +370,7 @@ class EmedController extends Controller
         $wpdb->select($db);
         $wpdb->query('START TRANSACTION');
         $result = array_map(function ($id) use ($wpdb, $current_user) {
-            return $wpdb->update('ds_emed_file', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+            return $wpdb->update('ds_emed_damage_salud', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
         }, explode(",", $data['ids']));
         $success = !in_array(false, $result, true);
         if ($success) {
@@ -379,6 +379,30 @@ class EmedController extends Controller
             $wpdb->query('ROLLBACK');
         }
         $wpdb->select($original_db);
+        return $success;
+    }
+
+    function file_delete($data)
+    {
+        global $wpdb;
+        $original_db = $wpdb->dbname;
+        $current_user = wp_get_current_user();
+        $erp = get_option("db_erp");
+        $wpdb->select($erp);
+        $wpdb->query('START TRANSACTION');
+      
+        $result = array_map(function ($id) use ($wpdb, $current_user) {
+            return $wpdb->update('ds_emed_file', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['ids']));
+        if ($wpdb->last_error) return t_error();
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
+        $wpdb->select($original_db);
+        
         return $success;
     }
 
@@ -667,26 +691,7 @@ class EmedController extends Controller
         return $o;
     }
 
-    function damage_salud_delete($data)
-    {
-        global $wpdb;
-        $original_db = $wpdb->dbname;
-        $current_user = wp_get_current_user();
-        $db = get_option("db_erp");
-        $wpdb->select($db);
-        $wpdb->query('START TRANSACTION');
-        $result = array_map(function ($id) use ($wpdb, $current_user) {
-            return $wpdb->update('ds_emed_damage_salud', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
-        }, explode(",", $data['ids']));
-        $success = !in_array(false, $result, true);
-        if ($success) {
-            $wpdb->query('COMMIT');
-        } else {
-            $wpdb->query('ROLLBACK');
-        }
-        $wpdb->select($original_db);
-        return $success;
-    }
+
 
     function delete($data)
     {

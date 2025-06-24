@@ -290,6 +290,9 @@ function directory_install()
           insert_uid int NOT NULL,
           insert_date int NOT NULL,
           insert_user varchar(50) NULL,
+          delete_uid int NULL,
+          delete_date int NULL,
+          delete_user varchar(50) NULL,
           canceled tinyint(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (id)
       )";
