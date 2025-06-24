@@ -304,6 +304,9 @@ class EmedController extends Controller
         $tmpId = remove($o, 'tmpId');
         unset($o['synchronized']);
         $inserted = 0;
+        $erp = get_option("db_erp");
+        $original_db = $wpdb->dbname;
+        $wpdb->select($erp);
         if ($o['id'] > 0) {
             /*$o['uid_update']=$current_user->ID;
             $o['user_update']=$current_user->user_login;
@@ -311,8 +314,8 @@ class EmedController extends Controller
             $updated=$wpdb->update('ds_emed_file',$o,array('id'=>$o['id']));*/
         } else {
             unset($o['id']);
-            $o['uid_insert'] = $current_user->ID;
-            $o['user_insert'] = $current_user->user_login;
+            $o['insert_uid'] = $current_user->ID;
+            $o['insert_user'] = $current_user->user_login;
             $o['insert_date'] = current_time('mysql', 1);
             if ($tmpId) $o['offline'] = $tmpId;
             //process src
@@ -321,6 +324,7 @@ class EmedController extends Controller
 
             $inserted = 1;
         }
+        $wpdb->select($original_db);
         if (false === $updated) return t_error();
         if ($tmpId) {
             $o['tmpId'] = $tmpId;
