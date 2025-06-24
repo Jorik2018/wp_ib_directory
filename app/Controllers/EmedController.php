@@ -346,8 +346,9 @@ class EmedController extends Controller
         $to = $request['to'];
         $emed = get_param($request, 'emed');
         $current_user = wp_get_current_user();
+        $erp = get_option("db_erp");
         $wpdb->last_error  = '';
-        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM ds_emed_file g " .
+        $results = $wpdb->get_results("SELECT SQL_CALC_FOUND_ROWS g.* FROM $erp.ds_emed_file g " .
             "WHERE g.canceled=0 " .
             (isset($emed) ? " AND g.emed_id like '$emed' " : "") .
             ($to > 0 ? ("LIMIT " . $from . ', ' . $to) : ""), ARRAY_A);
