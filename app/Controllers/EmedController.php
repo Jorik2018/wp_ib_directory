@@ -133,7 +133,7 @@ class EmedController extends Controller
                 return current_user_can('EMED_READ');
             }
         ));
-        register_rest_route('api/desarrollo-social', '/emed/action/(?P<id>\d+)', array(
+        register_rest_route('api/desarrollo-social', '/emed/action/(?P<ids>[0-9,]+)', array(
             'methods' => 'DELETE',
             'callback' => array($this, 'action_delete'),
             'permission_callback' => function () {
@@ -161,7 +161,7 @@ class EmedController extends Controller
                 return current_user_can('EMED_READ');
             }
         ));
-        register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<id>\d+)', array(
+        register_rest_route('api/desarrollo-social', '/emed/damage-ipress/(?P<ids>[0-9,]+)', array(
             'methods' => 'DELETE',
             'callback' => array($this, 'damage_ipress_delete'),
             'permission_callback' => function () {
@@ -196,7 +196,7 @@ class EmedController extends Controller
                 return current_user_can('EMED_READ');
             }
         ));
-        register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<id>\d+)', array(
+        register_rest_route('api/desarrollo-social', '/emed/damage-salud/(?P<ids>[0-9,]+)', array(
             'methods' => 'DELETE',
             'callback' => array($this, 'damage_salud_delete'),
             'permission_callback' => function () {
@@ -214,7 +214,7 @@ class EmedController extends Controller
             'methods' => 'GET',
             'callback' => array($this, 'file_pag')
         ));
-        register_rest_route('api/desarrollo-social', '/emed/file/(?P<id>\d+)', array(
+        register_rest_route('api/desarrollo-social', '/emed/file/(?P<ids>[0-9,]+)', array(
             'methods' => 'DELETE',
             'callback' => array($this, 'file_delete')
         ));
@@ -233,27 +233,6 @@ class EmedController extends Controller
         return $aux;
     }
 
-    function damage_salud_get($data)
-    {
-        global $wpdb;
-        $db = get_option("db_master");
-        $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM $db.ds_emed_damage_salud e WHERE e.id=" . $data['id']), ARRAY_A);
-        if ($wpdb->last_error) return t_error();
-        cfield($o, 'emed_id', 'emedId');
-        return $o;
-    }
-
-    function damage_salud_delete($data)
-    {
-        global $wpdb;
-        $original_db = $wpdb->dbname;
-        $db = get_option("db_erp");
-        $wpdb->select($db);
-        $row = $wpdb->update('ds_emed_damage_salud', array('canceled' => 1), array('id' => $data['id']));
-        $wpdb->select($original_db);
-        return $row;
-    }
-
     function damage_ipress_get($data)
     {
         global $wpdb;
@@ -268,11 +247,21 @@ class EmedController extends Controller
     {
         global $wpdb;
         $original_db = $wpdb->dbname;
+        $current_user = wp_get_current_user();
         $db = get_option("db_erp");
         $wpdb->select($db);
-        $row = $wpdb->update('ds_emed_damage_ipress', array('canceled' => 1), array('id' => $data['id']));
+        $wpdb->query('START TRANSACTION');
+        $result = array_map(function ($id) use ($wpdb, $current_user) {
+            return $wpdb->update('ds_emed_damage_ipress', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['ids']));
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
         $wpdb->select($original_db);
-        return $row;
+        return $success;
     }
 
     function action_get($data)
@@ -287,8 +276,22 @@ class EmedController extends Controller
     function action_delete($data)
     {
         global $wpdb;
-        $row = $wpdb->update('ds_emed_action', array('canceled' => 1), array('id' => $data['id']));
-        return $row;
+        $original_db = $wpdb->dbname;
+        $current_user = wp_get_current_user();
+        $db = get_option("db_erp");
+        $wpdb->select($db);
+        $wpdb->query('START TRANSACTION');
+        $result = array_map(function ($id) use ($wpdb, $current_user) {
+            return $wpdb->update('ds_emed_action', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['ids']));
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
+        $wpdb->select($original_db);
+        return $success;
     }
 
     function file_post(&$request)
@@ -356,9 +359,22 @@ class EmedController extends Controller
     function file_delete($data)
     {
         global $wpdb;
-        $row = $wpdb->update('ds_emed_file', array('canceled' => 1), array('id' => $data['id']));
-        //remove file 
-        return $row;
+        $original_db = $wpdb->dbname;
+        $current_user = wp_get_current_user();
+        $db = get_option("db_erp");
+        $wpdb->select($db);
+        $wpdb->query('START TRANSACTION');
+        $result = array_map(function ($id) use ($wpdb, $current_user) {
+            return $wpdb->update('ds_emed_file', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['ids']));
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
+        $wpdb->select($original_db);
+        return $success;
     }
 
     function pag($request)
@@ -466,7 +482,7 @@ class EmedController extends Controller
         $original_db = $wpdb->dbname;
         $wpdb->select($erp);
         $wpdb->query('START TRANSACTION');
-        
+
         if ($o['id'] > 0) {
             $o['update_date'] = current_time('mysql', 1);
             $o['user_update'] = $current_user->user_login;
@@ -537,15 +553,16 @@ class EmedController extends Controller
         $erp = get_option("db_erp");
         $original_db = $wpdb->dbname;
         $wpdb->select($erp);
+
         if ($o['id'] > 0) {
-            $o['uid_update'] = $current_user->ID;
-            $o['user_update'] = $current_user->user_login;
+            $o['update_uid'] = $current_user->ID;
+            $o['update_user'] = $current_user->user_login;
             $o['update_date'] = current_time('mysql', 1);
             $updated = $wpdb->update('ds_emed_action', $o, array('id' => $o['id']));
         } else {
             unset($o['id']);
-            $o['uid_insert'] = $current_user->ID;
-            $o['user_insert'] = $current_user->user_login;
+            $o['insert_uid'] = $current_user->ID;
+            $o['insert_user'] = $current_user->user_login;
             $o['insert_date'] = current_time('mysql', 1);
             if ($tmpId) $o['offline'] = $tmpId;
             $updated = $wpdb->insert('ds_emed_action', $o);
@@ -575,14 +592,14 @@ class EmedController extends Controller
         $original_db = $wpdb->dbname;
         $wpdb->select($erp);
         if ($o['id'] > 0) {
-            $o['uid_update'] = $current_user->ID;
-            $o['user_update'] = $current_user->user_login;
+            $o['update_uid'] = $current_user->ID;
+            $o['update_user'] = $current_user->user_login;
             $o['update_date'] = current_time('mysql', 1);
             $updated = $wpdb->update('ds_emed_damage_ipress', $o, array('id' => $o['id']));
         } else {
             unset($o['id']);
-            $o['uid_insert'] = $current_user->ID;
-            $o['user_insert'] = $current_user->user_login;
+            $o['insert_uid'] = $current_user->ID;
+            $o['insert_user'] = $current_user->user_login;
             $o['insert_date'] = current_time('mysql', 1);
             if ($tmpId) $o['offline'] = $tmpId;
             $updated = $wpdb->insert('ds_emed_damage_ipress', $o);
@@ -612,14 +629,14 @@ class EmedController extends Controller
         $original_db = $wpdb->dbname;
         $wpdb->select($erp);
         if ($o['id'] > 0) {
-            $o['uid_update'] = $current_user->ID;
-            $o['user_update'] = $current_user->user_login;
+            $o['update_uid'] = $current_user->ID;
+            $o['update_user'] = $current_user->user_login;
             $o['update_date'] = current_time('mysql', 1);
             $updated = $wpdb->update('ds_emed_damage_salud', $o, array('id' => $o['id']));
         } else {
             unset($o['id']);
-            $o['uid_insert'] = $current_user->ID;
-            $o['user_insert'] = $current_user->user_login;
+            $o['insert_uid'] = $current_user->ID;
+            $o['insert_user'] = $current_user->user_login;
             $o['insert_date'] = current_time('mysql', 1);
             if ($tmpId) $o['offline'] = $tmpId;
             $updated = $wpdb->insert('ds_emed_damage_salud', $o);
@@ -633,6 +650,37 @@ class EmedController extends Controller
             $o['synchronized'] = 1;
         }
         return $o;
+    }
+
+    function damage_salud_get($data)
+    {
+        global $wpdb;
+        $db = get_option("db_master");
+        $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM $db.ds_emed_damage_salud e WHERE e.id=" . $data['id']), ARRAY_A);
+        if ($wpdb->last_error) return t_error();
+        cfield($o, 'emed_id', 'emedId');
+        return $o;
+    }
+
+    function damage_salud_delete($data)
+    {
+        global $wpdb;
+        $original_db = $wpdb->dbname;
+        $current_user = wp_get_current_user();
+        $db = get_option("db_erp");
+        $wpdb->select($db);
+        $wpdb->query('START TRANSACTION');
+        $result = array_map(function ($id) use ($wpdb, $current_user) {
+            return $wpdb->update('ds_emed_damage_salud', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
+        }, explode(",", $data['ids']));
+        $success = !in_array(false, $result, true);
+        if ($success) {
+            $wpdb->query('COMMIT');
+        } else {
+            $wpdb->query('ROLLBACK');
+        }
+        $wpdb->select($original_db);
+        return $success;
     }
 
     function delete($data)
