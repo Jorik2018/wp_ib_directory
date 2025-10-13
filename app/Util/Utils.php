@@ -6,6 +6,18 @@ namespace IB\directory\Util;
 
 use WPMVC\Bridge;
 
+function renameFields(array $data, array $fieldMap): array {
+    $result = [];
+    foreach ($data as $key => $value) {
+        if (isset($fieldMap[$key])) {
+            $result[$fieldMap[$key]] = $value;
+        } else {
+            $result[$key] = $value; // conserva los no mapeados
+        }
+    }
+    return $result;
+}
+
 function camelCase($string, $capitalizeFirstCharacter = false)
 {
 
