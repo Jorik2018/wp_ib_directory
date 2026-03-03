@@ -18,53 +18,74 @@ function renameFields(array $data, array $fieldMap): array {
     return $result;
 }
 
-function camelCase($string, $capitalizeFirstCharacter = false)
-{
-
-    $str = str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $string)));
-
-    if (!$capitalizeFirstCharacter) {
-        $str[0] = strtolower($str[0]);
-    }
-
-    return $str;
-}
-
-function toCamelCase($data)
-{
+function toLowerCase($data) {
     if (is_object($data)) {
         $result = new \stdClass();
         foreach ($data as $key => $value) {
-            $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
+            $newKey = strtolower($key);
             $result->$newKey = toCamelCase($value);
         }
         return  $result;
     } elseif (is_array($data)) {
-        $keys = array_keys($data);
-        $isNumeric = false;
-        foreach ($keys as $key) {
-            if (is_int($key)) {
-                $isNumeric = true;
-            }
-            break;
-        }
+		$keys = array_keys($data);
+		$isNumeric = empty($keys);
+        if(!$isNumeric )
+		foreach ($keys as $key) {
+			if (is_int($key)) {
+				$isNumeric = true;
+			}
+			break;
+		}
+		if($isNumeric){
+			$result = array();
+			foreach ($data as $item) {
+				$result[] = toLowerCase($item);
+			}
+			return $result;
+		}else{
+			$result = new \stdClass();
+			foreach ($data as $key => $value) {
+				$newKey = strtolower($key);
+				$result->$newKey = $value;
+			}
+			return  $result;
+		}
+    } else {
+        return $data;
+    }
+}
+
+function toCamelCase($data) {
+    if (is_object($data)) {
+        // Convertir objeto → array para mantener consistencia
+        $data = (array) $data;
+    }
+
+    if (is_array($data)) {
+
+        // Detectar si es array numérico
+        $isNumeric = array_keys($data) === range(0, count($data) - 1);
+
         if ($isNumeric) {
-            $result = array();
+            // Lista de elementos
+            $result = [];
             foreach ($data as $item) {
                 $result[] = toCamelCase($item);
             }
             return $result;
-        } else {
-            $result = new \stdClass();
-            foreach ($data as $key => $value) {
-                $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
-                $result->$newKey = $value;
-            }
-            return  $result;
         }
-    } else {
-        return $data;
+
+        // Array asociativo → devolver array, NO stdClass
+        $result = [];
+        foreach ($data as $key => $value) {
+            $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
+            $result[$newKey] = toCamelCase($value);
+        }
+
+        return $result;
     }
+
+    return $data; // valor primitivo
 }
 
 function cdfield(&$row, $key)
@@ -104,14 +125,23 @@ function cfield(&$row, $from, $to)
 
 function get_param($request, $param_name = null)
 {
-    if ($param_name) {
-        if (is_object($request) && method_exists($request, 'get_param')) {
-            return $request->get_param($param_name);
-        }
-        return isset($request[$param_name]) ? $request[$param_name] : null;
-    } else {
-        return is_object($request) &&method_exists($request, 'get_params') ? $request->get_params() : $request;
+    // Si es objeto tipo WP_REST_Request
+    if (is_object($request) && method_exists($request, 'get_param')) {
+        return $param_name !== null
+            ? $request->get_param($param_name)
+            : (method_exists($request, 'get_params')
+                ? $request->get_params()
+                : null);
     }
+
+    // Si es array
+    if (is_array($request)) {
+        return $param_name !== null
+            ? ($request[$param_name] ?? null)
+            : $request;
+    }
+
+    return null;
 }
 
 function remove(array &$arr, $key)

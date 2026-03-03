@@ -13,6 +13,7 @@ return array(
     'WPMVC\\' => array($vendorDir . '/10quality/wpmvc-core/src/psr4'),
     'TenQuality\\WP\\' => array($vendorDir . '/10quality/wp-file/src'),
     'TenQuality\\Gettext\\Scanner\\' => array($vendorDir . '/10quality/gettext-wp-scanner/src'),
+    'PhpOffice\\' => array($vendorDir . '/phpoffice/phpspreadsheet/src'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
     'Peast\\' => array($vendorDir . '/mck89/peast/lib/Peast'),
     'PHP_Parallel_Lint\\PhpConsoleColor\\' => array($vendorDir . '/php-parallel-lint/php-console-color/src'),
