@@ -6,7 +6,8 @@ namespace IB\directory\Util;
 
 use WPMVC\Bridge;
 
-function renameFields(array $data, array $fieldMap): array {
+function renameFields(array $data, array $fieldMap): array
+{
     $result = [];
     foreach ($data as $key => $value) {
         if (isset($fieldMap[$key])) {
@@ -18,7 +19,8 @@ function renameFields(array $data, array $fieldMap): array {
     return $result;
 }
 
-function toLowerCase($data) {
+function toLowerCase($data)
+{
     if (is_object($data)) {
         $result = new \stdClass();
         foreach ($data as $key => $value) {
@@ -27,35 +29,36 @@ function toLowerCase($data) {
         }
         return  $result;
     } elseif (is_array($data)) {
-		$keys = array_keys($data);
-		$isNumeric = empty($keys);
-        if(!$isNumeric )
-		foreach ($keys as $key) {
-			if (is_int($key)) {
-				$isNumeric = true;
-			}
-			break;
-		}
-		if($isNumeric){
-			$result = array();
-			foreach ($data as $item) {
-				$result[] = toLowerCase($item);
-			}
-			return $result;
-		}else{
-			$result = new \stdClass();
-			foreach ($data as $key => $value) {
-				$newKey = strtolower($key);
-				$result->$newKey = $value;
-			}
-			return  $result;
-		}
+        $keys = array_keys($data);
+        $isNumeric = empty($keys);
+        if (!$isNumeric)
+            foreach ($keys as $key) {
+                if (is_int($key)) {
+                    $isNumeric = true;
+                }
+                break;
+            }
+        if ($isNumeric) {
+            $result = array();
+            foreach ($data as $item) {
+                $result[] = toLowerCase($item);
+            }
+            return $result;
+        } else {
+            $result = new \stdClass();
+            foreach ($data as $key => $value) {
+                $newKey = strtolower($key);
+                $result->$newKey = $value;
+            }
+            return  $result;
+        }
     } else {
         return $data;
     }
 }
 
-function toCamelCase($data) {
+function toCamelCase($data)
+{
     if (is_object($data)) {
         // Convertir objeto → array para mantener consistencia
         $data = (array) $data;
