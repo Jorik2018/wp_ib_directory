@@ -35,10 +35,6 @@ class Main extends Bridge {
         register_activation_hook(WPMVC_PLUGIN_FILE, [$this, 'install']);
         $this->add_action( 'rest_api_init','EmedController@rest_api_init');
         $this->add_action( 'init','EmedController@init');
-
-        $this->add_action( 'rest_api_init','PayrollController@rest_api_init');
-        $this->add_action( 'init','PayrollController@init');
-    
         $this->add_action( 'rest_api_init','VeaMaternoController@rest_api_init');
         $this->add_action( 'init','VeaMaternoController@init');
         $this->add_action( 'rest_api_init','AdminController@rest_api_init');
