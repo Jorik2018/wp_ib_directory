@@ -10,7 +10,7 @@ use function IB\directory\Util\mapKeysToSnakeCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 use function IB\directory\Util\get_param;
-use function IB\directory\Util\toCamelCase;
+use function IB\directory\Util\mapKeysToCamelCase;
 
 
 class EmedController extends Controller
@@ -361,7 +361,7 @@ class EmedController extends Controller
         return $to > 0 ? array('data' => $results, 'size' => $wpdb->get_var('SELECT FOUND_ROWS()')) : $results;
     }
 
-        function damage_salud_delete($data)
+    function damage_salud_delete($data)
     {
         global $wpdb;
         $original_db = $wpdb->dbname;
@@ -390,7 +390,7 @@ class EmedController extends Controller
         $erp = get_option("db_erp");
         $wpdb->select($erp);
         $wpdb->query('START TRANSACTION');
-      
+
         $result = array_map(function ($id) use ($wpdb, $current_user) {
             return $wpdb->update('ds_emed_file', array('canceled' => 1, 'delete_user' => $current_user->user_login, 'delete_uid' => $current_user->ID, 'delete_date' => current_time('mysql')), array('id' => $id));
         }, explode(",", $data['ids']));
@@ -402,7 +402,7 @@ class EmedController extends Controller
             $wpdb->query('ROLLBACK');
         }
         $wpdb->select($original_db);
-        
+
         return $success;
     }
 
@@ -441,10 +441,10 @@ class EmedController extends Controller
         if ($wpdb->last_error) return t_error();
         foreach ($results as &$r) {
             $r['editable'] = (bool) $r['editable'];
-        }
-        $count = $wpdb->get_var('SELECT FOUND_ROWS()');
+        };
         if ($wpdb->last_error) return t_error();
-        return array('data' => $results, 'size' => $count);
+        $results  = mapKeysToCamelCase($results);
+        return array('data' => $results, 'size' => $wpdb->get_var('SELECT FOUND_ROWS()'));
     }
 
     function post(&$request)

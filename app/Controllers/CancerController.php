@@ -109,7 +109,7 @@ class CancerController extends Controller
         $rl=$request->get_params();
         $aux=array();
         foreach ($rl as &$o) {
-            $aux[]=$this-post($o);
+            $aux[]=$this->post($o);
         }
         return $aux;
     }
