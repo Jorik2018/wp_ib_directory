@@ -127,43 +127,15 @@ class PregnantController extends Controller
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
         if ($onlyUpload) return array('success' => true);
-        foreach (
-            [
-                'establecimiento_salud',
-                'codigo_EESS',
-                'emergency_red',
-                'emergency_microred',
-                'descripcion_sector',
-                'descripcion_direccion',
-                'numero_DNI',
-                'apellido_paterno',
-                'apellido_materno',
-                'fecha_nacimiento',
-                'estado_civil',
-                'grado_instruccion',
-                'gestante_numero_celular',
-                'gestante_familia_celular',
-                'gestante_numero',
-                'gestante_paridad',
-                'gestante_FUR',
-                'gestante_FPP',
-                'gestante_edad_gestacional_semanas',
-                'gestante_riesgo_obstetrico',
-                'lugar_IPRESS',
-                'lugar_diagnostico',
-                'lugar_fecha_emergencia',
-                'lugar_fecha_referida',
-                'migracion_IPRESS',
-                'migracion_observacion',
-                'migracion_estado',
-                'migracion_fecha_retorno',
-                'user_register',
-                'user_modificacion'
-            ] as &$k
-        ) {
-            cfield($o, toCamelCase($k), $k);
-        }
-        mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP', 'codigo_ccpp'));
+        $o = mapKeysToSnakeCase($o, [
+            'codigoEESS' => 'codigo_eess',
+            'codigoCCPP' => 'codigo_ccpp',
+            'migracionIPRESS' => 'migracion_IPRESS',
+            'lugarIPRESS' => 'lugar_IPRESS',
+            'gestanteFPP' => 'gestante_FPP',
+            'gestanteFUR' => 'gestante_FUR',
+            'numeroDNI' => 'numero_DNI'
+        ]);
         cfield($o, 'codigoEESS', 'codigo_EESS');
         cfield($o, 'codigoCCPP', 'codigo_ccpp');
         unset($o['codigo_eess']);
@@ -240,11 +212,15 @@ class PregnantController extends Controller
         $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM $db.ds_gestante e WHERE e.id=" . $request['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
         mapKeysToCamelCase($o, array_flip(array(
-            'codigoEESS' => 'codigo_eess', 
-            'numeroDNI', 'numero_dni', 
-            'codigoCCPP', 'codigo_ccpp', 
-            'gestanteFUR', 'gestante_fur', 
-            'gestanteFPP', 'gestante_fpp'
+            'codigoEESS' => 'codigo_eess',
+            'numeroDNI',
+            'numero_dni',
+            'codigoCCPP',
+            'codigo_ccpp',
+            'gestanteFUR',
+            'gestante_fur',
+            'gestanteFPP',
+            'gestante_fpp'
         )));
         cdfield($o, 'gestanteFUR');
         cdfield($o, 'gestanteFPP');
@@ -422,5 +398,4 @@ class PregnantController extends Controller
         $wpdb->select($original_db);
         return $success;
     }
-
 }

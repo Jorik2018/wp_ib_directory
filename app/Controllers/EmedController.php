@@ -456,7 +456,7 @@ class EmedController extends Controller
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
         if ($onlyUpload) return array('success' => true);
-        mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP' => 'codigo_ccpp'));
+        $o = mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP' => 'codigo_ccpp'));
         unset($o['codigo_eess']);
         //unset($o['codigo_ccpp']);
         cdfield($o, 'lugar_fecha_emergencia');
