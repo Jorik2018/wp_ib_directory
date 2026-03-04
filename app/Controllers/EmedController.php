@@ -6,7 +6,7 @@ use WP_Error;
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
-use function IB\directory\Util\camelCase;
+use function IB\directory\Util\mapKeysToSnakeCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 use function IB\directory\Util\get_param;
@@ -457,45 +457,9 @@ class EmedController extends Controller
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
         if ($onlyUpload) return array('success' => true);
-        foreach (
-            [
-                'establecimiento_salud',
-                'codigo_EESS',
-                'emergency_red',
-                'emergency_microred',
-                'descripcion_sector',
-                'descripcion_direccion',
-                'numero_DNI',
-                'apellido_paterno',
-                'apellido_materno',
-                'fecha_nacimiento',
-                'estado_civil',
-                'grado_instruccion',
-                'gestante_numero_celular',
-                'gestante_familia_celular',
-                'gestante_numero',
-                'gestante_edad_gestacional_semanas',
-                'gestante_riesgo_obstetrico',
-                'lugar_IPRESS',
-                'lugar_diagnostico',
-                'lugar_fecha_emergencia',
-                'lugar_fecha_referida',
-                'migracion_IPRESS',
-                'migracion_observacion',
-                'migracion_estado',
-                'migracion_fecha_retorno',
-                'user_insert',
-                'user_update'
-            ] as &$k
-        ) {
-            cfield($o, camelCase($k), $k);
-        }
-        cfield($o, 'codigoEESS', 'codigo_EESS');
+        mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP', 'codigo_ccpp'));
         unset($o['codigo_eess']);
         unset($o['codigo_ccpp']);
-        cfield($o, 'codigoCCPP', 'codigo_ccpp');
-        cdfield($o, 'gestante_FUR');
-        cdfield($o, 'gestante_FPP');
         cdfield($o, 'lugar_fecha_emergencia');
         cdfield($o, 'lugar_fecha_referida');
         cdfield($o, 'date');

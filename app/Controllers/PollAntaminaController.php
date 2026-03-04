@@ -5,7 +5,6 @@ namespace IB\directory\Controllers;
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
-use function IB\directory\Util\camelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 
@@ -94,7 +93,7 @@ class PollAntaminaController extends Controller
         if(!empty($results)){ 
             foreach($results as $row){ 
                 $id=$row->id;  
-                $updated = $wpdb->update('acta', $r, array(id=>$id) );
+                $updated = $wpdb->update('acta', $r, array('id'=>$id) );
                 $r['id']=$id;
             }
         }else{
@@ -114,7 +113,7 @@ class PollAntaminaController extends Controller
         $aux=array();
         foreach ($rl as &$o) {
             $o['poll']=$poll;
-            $aux[]=api_poll_post($o);
+            $aux[]=$this->api_poll_post($o);
         }
         return $aux;
     }
@@ -152,7 +151,7 @@ class PollAntaminaController extends Controller
             foreach($peoples as $key=>&$people){
                 $people['encuesta_id']=$o['id'];
                 $people['poll']=$poll;
-                $peoples[$key]=api_poll_people_post($people);
+                $peoples[$key]=$this->api_poll_people_post($people);
             }
             $o['people']=$peoples;
         }
@@ -172,7 +171,7 @@ class PollAntaminaController extends Controller
         $o['uid']=$current_user->ID;
         if(!($o['encuesta_id']>0))return t_error('El miembro de la familia debe relacionarse a una encuesta de hogar valida. ENCUESTA_ID= '.$o['encuesta_id']);
         if($o['id']>0)
-            $updated=$wpdb->update('encuesta_people_'.$poll,$o,array(id=>$o['id']));
+            $updated=$wpdb->update('encuesta_people_'.$poll,$o,array('id'=>$o['id']));
         else{
             unset($o['id']);
             if($tmpId)$o['offline']=$tmpId;

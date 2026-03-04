@@ -6,6 +6,103 @@ namespace IB\directory\Util;
 
 use WPMVC\Bridge;
 
+function camelCase($string, $capitalizeFirstCharacter = false)
+{
+
+    $str = str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $string)));
+
+    if (!$capitalizeFirstCharacter) {
+        $str[0] = strtolower($str[0]);
+    }
+
+    return $str;
+}
+
+function toCamelCase($data)
+{
+    if (is_object($data)) {
+        // Convertir objeto → array para mantener consistencia
+        $data = (array) $data;
+    }
+
+    if (is_array($data)) {
+
+        // Detectar si es array numérico
+        $isNumeric = array_keys($data) === range(0, count($data) - 1);
+
+        if ($isNumeric) {
+            // Lista de elementos
+            $result = [];
+            foreach ($data as $item) {
+                $result[] = toCamelCase($item);
+            }
+            return $result;
+        }
+
+        // Array asociativo → devolver array, NO stdClass
+        $result = [];
+        foreach ($data as $key => $value) {
+            $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
+            $result[$newKey] = toCamelCase($value);
+        }
+
+        return $result;
+    }
+
+    return $data; // valor primitivo
+}
+
+function mapKeysToCamelCase($data, array $overrides = [])
+{
+    if (is_object($data)) {
+        $data = get_object_vars($data);
+    }
+
+    if (is_array($data)) {
+
+        $isNumeric = array_keys($data) === range(0, count($data) - 1);
+
+        if ($isNumeric) {
+            $result = [];
+            foreach ($data as $item) {
+                $result[] = mapKeysToCamelCase($item, $overrides);
+            }
+            return $result;
+        }
+
+        $result = [];
+
+        foreach ($data as $key => $value) {
+
+            // Si hay override explícito, usarlo
+            if (isset($overrides[$key])) {
+                $newKey = $overrides[$key];
+            } else {
+                $newKey = lcfirst(
+                    str_replace(' ', '', ucwords(str_replace('_', ' ', $key)))
+                );
+            }
+
+            $result[$newKey] = mapKeysToCamelCase($value, $overrides);
+        }
+
+        return $result;
+    }
+
+    return $data;
+}
+
+function mapKeysToSnakeCase(array|object $data, array $overrides = []): array
+{
+    $result = [];
+    foreach ((array) $data as $key => $value) {
+        $dbKey = $overrides[$key]
+            ?? strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
+        $result[$dbKey] = $value;
+    }
+    return $result;
+}
+
 function renameFields(array $data, array $fieldMap): array
 {
     $result = [];
@@ -55,40 +152,6 @@ function toLowerCase($data)
     } else {
         return $data;
     }
-}
-
-function toCamelCase($data)
-{
-    if (is_object($data)) {
-        // Convertir objeto → array para mantener consistencia
-        $data = (array) $data;
-    }
-
-    if (is_array($data)) {
-
-        // Detectar si es array numérico
-        $isNumeric = array_keys($data) === range(0, count($data) - 1);
-
-        if ($isNumeric) {
-            // Lista de elementos
-            $result = [];
-            foreach ($data as $item) {
-                $result[] = toCamelCase($item);
-            }
-            return $result;
-        }
-
-        // Array asociativo → devolver array, NO stdClass
-        $result = [];
-        foreach ($data as $key => $value) {
-            $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
-            $result[$newKey] = toCamelCase($value);
-        }
-
-        return $result;
-    }
-
-    return $data; // valor primitivo
 }
 
 function cdfield(&$row, $key)

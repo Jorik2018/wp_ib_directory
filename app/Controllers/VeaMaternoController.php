@@ -5,7 +5,7 @@ namespace IB\directory\Controllers;
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
-use function IB\directory\Util\camelCase;
+use function IB\directory\Util\toCamelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 
@@ -106,7 +106,7 @@ class VeaMaternoController extends Controller {
         'lugar_IPRESS', 'lugar_diagnostico', 'lugar_fecha_emergencia', 'lugar_fecha_referida', 'migracion_IPRESS', 
         'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_update',
         'ipress_1','ipress_2','ipress_3','ipress_4','ipress_5','ipress_6'] as &$k){
-            cfield($o,camelCase($k),$k);
+            cfield($o,toCamelCase($k),$k);
         }
         cfield($o,'codigoEESS','codigo_EESS');
         unset($o['codigo_eess']);
@@ -190,7 +190,7 @@ class VeaMaternoController extends Controller {
         'gestante_numero', 'gestante_paridad', 'gestante_FUR', 'gestante_FPP', 'gestante_edad_gestacional_semanas', 'gestante_riesgo_obstetrico', 
         'lugar_IPRESS', 'lugar_diagnostico', 'lugar_fecha_emergencia', 'lugar_fecha_referida', 'migracion_IPRESS', 
         'migracion_observacion', 'migracion_estado', 'migracion_fecha_retorno', 'user_update'] as &$k){
-            cfield($o,$k,camelCase($k));
+            cfield($o,$k,toCamelCase($k));
         }
         cfield($o,'codigo_eess','codigoEESS');
         cfield($o,'numero_dni','numeroDNI');

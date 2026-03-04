@@ -5,7 +5,9 @@ namespace IB\directory\Controllers;
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
 use function IB\directory\Util\cfield;
-use function IB\directory\Util\camelCase;
+use function IB\directory\Util\toCamelCase;
+use function IB\directory\Util\mapKeysToSnakeCase;
+use function IB\directory\Util\mapKeysToCamelCase;
 use function IB\directory\Util\cdfield;
 use function IB\directory\Util\t_error;
 
@@ -159,12 +161,12 @@ class PregnantController extends Controller
                 'user_modificacion'
             ] as &$k
         ) {
-            cfield($o, camelCase($k), $k);
+            cfield($o, toCamelCase($k), $k);
         }
+        mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP', 'codigo_ccpp'));
         cfield($o, 'codigoEESS', 'codigo_EESS');
         cfield($o, 'codigoCCPP', 'codigo_ccpp');
         unset($o['codigo_eess']);
-
         cdfield($o, 'gestante_FUR');
         cdfield($o, 'fecha_nacimiento');
         cdfield($o, 'gestante_FPP');
@@ -237,48 +239,13 @@ class PregnantController extends Controller
         $db = get_option("db_erp");
         $o = $wpdb->get_row($wpdb->prepare("SELECT e.* FROM $db.ds_gestante e WHERE e.id=" . $request['id']), ARRAY_A);
         if ($wpdb->last_error) return t_error();
-        foreach (
-            [
-                'establecimiento_salud',
-                'codigo_EESS',
-                'codigo_CCPP',
-                'emergency_red',
-                'emergency_microred',
-                'descripcion_sector',
-                'descripcion_direccion',
-                'numero_DNI',
-                'apellido_paterno',
-                'apellido_materno',
-                'fecha_nacimiento',
-                'estado_civil',
-                'grado_instruccion',
-                'gestante_numero_celular',
-                'gestante_familia_celular',
-                'gestante_numero',
-                'gestante_paridad',
-                'gestante_FUR',
-                'gestante_FPP',
-                'gestante_edad_gestacional_semanas',
-                'gestante_riesgo_obstetrico',
-                'lugar_IPRESS',
-                'lugar_diagnostico',
-                'lugar_fecha_emergencia',
-                'lugar_fecha_referida',
-                'migracion_IPRESS',
-                'migracion_observacion',
-                'migracion_estado',
-                'migracion_fecha_retorno',
-                'user_register',
-                'user_modificacion'
-            ] as &$k
-        ) {
-            cfield($o, $k, camelCase($k));
-        }
-        cfield($o, 'codigo_eess', 'codigoEESS');
-        cfield($o, 'numero_dni', 'numeroDNI');
-        cfield($o, 'codigo_ccpp', 'codigoCCPP');
-        cfield($o, 'gestante_fur', 'gestanteFUR');
-        cfield($o, 'gestante_fpp', 'gestanteFPP');
+        mapKeysToCamelCase($o, array_flip(array(
+            'codigoEESS' => 'codigo_eess', 
+            'numeroDNI', 'numero_dni', 
+            'codigoCCPP', 'codigo_ccpp', 
+            'gestanteFUR', 'gestante_fur', 
+            'gestanteFPP', 'gestante_fpp'
+        )));
         cdfield($o, 'gestanteFUR');
         cdfield($o, 'gestanteFPP');
         $o['ext'] = array();
