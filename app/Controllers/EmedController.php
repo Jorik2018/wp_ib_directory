@@ -451,15 +451,14 @@ class EmedController extends Controller
     {
         global $wpdb;
         $o = get_param($request);
-
         $current_user = wp_get_current_user();
         remove($o, 'editable');
         $onlyUpload = remove($o, 'onlyUpload');
         $migration = remove($o, 'migration');
         if ($onlyUpload) return array('success' => true);
-        mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP', 'codigo_ccpp'));
+        mapKeysToSnakeCase($o, array('codigoEESS' => 'codigo_EESS', 'codigoCCPP' => 'codigo_ccpp'));
         unset($o['codigo_eess']);
-        unset($o['codigo_ccpp']);
+        //unset($o['codigo_ccpp']);
         cdfield($o, 'lugar_fecha_emergencia');
         cdfield($o, 'lugar_fecha_referida');
         cdfield($o, 'date');
