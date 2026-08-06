@@ -182,8 +182,17 @@ class UserController extends Controller
                         ['status'=>404]
                     );
                 }
-
-                return $user;
+                $payload = AuthenticateService::generatePayload(
+                    [],
+                    $wordPressData,
+                    $jwtSettings,
+                    $user
+                );
+                return [
+                    'user'=>$user,
+                    'payload'=>$payload,
+                    'oauth'=>$oauth
+                ];
         }
     }
 
