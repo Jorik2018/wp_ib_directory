@@ -69,7 +69,7 @@ class UserController extends Controller
                     . '?client_id=' . urlencode(get_option('oauth_client_id'))
                     . '&response_type=code'
                     . '&scope=' . urlencode('openid profile email')
-                    . '&redirect_uri=' . urlencode('https://app.midominio.com/auth/callback')
+                    . '&redirect_uri=' . urlencode('https://dbasure.com/erp')
                     . '&state=' . urlencode(wp_create_nonce($provider));
 
                 break;
