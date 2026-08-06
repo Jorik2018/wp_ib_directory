@@ -8,7 +8,7 @@ use SimpleJWTLogin\Libraries\JWT\JWT;
 use SimpleJWTLogin\Helpers\Jwt\JwtKeyFactory;
 use SimpleJWTLogin\Modules\WordPressData;
 use SimpleJWTLogin\Modules\SimpleJWTLoginSettings;
-
+use SimpleJWTLogin\Modules\SimpleJWTLoginHooks;
 class UserController extends Controller
 {
 
@@ -174,7 +174,6 @@ class UserController extends Controller
                     'email',
                     $email
                 );
-
                 if (!$user) {
                     return new \WP_Error(
                         'user_not_found',
@@ -182,18 +181,72 @@ class UserController extends Controller
                         ['status'=>404]
                     );
                 }
-                $payload = AuthenticateService::generatePayload(
-                    [],
-                    $wordPressData,
-                    $jwtSettings,
-                    $user
-                );
-                return [
-                    'user'=>$user,
-                    'payload'=>$payload,
-                    'oauth'=>$oauth
-                ];
+                
         }
+        return $this->generate_jwt_for_user($user);
+    }
+
+    private function generate_jwt_for_user($user)
+    {
+        $wordPressData = new WordPressData();
+
+        $jwtSettings = new SimpleJWTLoginSettings(
+            $wordPressData
+        );
+
+        // Generar payload base
+        $payload = AuthenticateService::generatePayload(
+            [],
+            $wordPressData,
+            $jwtSettings,
+            $user
+        );
+
+        // Permitir agregar campos al payload
+        if (
+            $jwtSettings
+                ->getHooksSettings()
+                ->isHookEnable(SimpleJWTLoginHooks::JWT_PAYLOAD_ACTION_NAME)
+        ) {
+            $payload = $wordPressData->triggerFilter(
+                SimpleJWTLoginHooks::JWT_PAYLOAD_ACTION_NAME,
+                $payload,
+                []
+            );
+        }
+
+        // Crear JWT
+        $jwt = JWT::encode(
+            $payload,
+            JwtKeyFactory::getFactory($jwtSettings)
+                ->getPrivateKey(),
+            $jwtSettings
+                ->getGeneralSettings()
+                ->getJWTDecryptAlgorithm()
+        );
+
+
+        $response = [
+            'success' => true,
+            'data' => [
+                'jwt' => $jwt
+            ]
+        ];
+
+        // Permitir agregar campos extras a la respuesta
+        if (
+            $jwtSettings
+                ->getHooksSettings()
+                ->isHookEnable(SimpleJWTLoginHooks::HOOK_RESPONSE_AUTH_USER)
+        ) {
+            $response = $wordPressData->triggerFilter(
+                SimpleJWTLoginHooks::HOOK_RESPONSE_AUTH_USER,
+                $response,
+                $user
+            );
+        }
+
+        return $response;
     }
 
     function get()
