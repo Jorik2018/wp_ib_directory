@@ -146,12 +146,45 @@ class UserController extends Controller
             true
         );
 
+        $user = $this->get_user_from_oauth(
+            $provider,
+            $oauth
+        );
         // TODO:
         // obtener usuario
         // generar Simple JWT
 
-        return $oauth;
+        return $user;
     }
+
+    private function get_user_from_oauth($provider, $oauth)
+{
+    switch($provider){
+
+        case 'miniorange':
+
+            $decoded = JWT::extractDataFromJwt(
+                $oauth['id_token']
+            );
+
+            $email = $decoded['payload']['email'];
+
+            $user = get_user_by(
+                'email',
+                $email
+            );
+
+            if (!$user) {
+                return new \WP_Error(
+                    'user_not_found',
+                    'User not found',
+                    ['status'=>404]
+                );
+            }
+
+            return $user;
+    }
+}
 
     function get()
     {
