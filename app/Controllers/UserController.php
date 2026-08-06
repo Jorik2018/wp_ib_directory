@@ -51,9 +51,42 @@ class UserController extends Controller
             'methods'  => 'POST',
             'callback' => [$this, 'api_oauth_token_post'],
         ]);
-
+        register_rest_route('api/oauth', '/(?P<provider>[a-zA-Z0-9_-]+)', [
+            'methods'             => 'GET',
+            'callback'            => [$this, 'api_oauth_authorize_get'],
+        ]);
     }
+    public function api_oauth_authorize_get(\WP_REST_Request $request)
+    {
+        $provider = $request->get_param('provider');
 
+        switch ($provider) {
+
+            case 'miniorange':
+
+                $authorizeUrl =
+                    'https://dbasure.com/wp-json/moserver/authorize'
+                    . '?client_id=' . urlencode(get_option('oauth_client_id'))
+                    . '&response_type=code'
+                    . '&scope=' . urlencode('openid profile email')
+                    . '&redirect_uri=' . urlencode('https://app.midominio.com/auth/callback')
+                    . '&state=' . urlencode(wp_create_nonce($provider));
+
+                break;
+
+            default:
+
+                return new WP_Error(
+                    'invalid_provider',
+                    'Provider not supported',
+                    ['status' => 400]
+                );
+        }
+
+        return [
+            'url' => $authorizeUrl
+        ];
+    }
     public function api_oauth_token_post($request)
     {
         $provider = $request->get_param('provider');
@@ -66,7 +99,7 @@ class UserController extends Controller
                 $tokenEndpoint =
                     home_url('/wp-json/moserver/token');
 
-                $clientId =
+                $clientId = 
                     get_option('oauth_client_id');
 
                 $clientSecret =
