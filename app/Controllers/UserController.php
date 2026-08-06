@@ -50,12 +50,11 @@ class UserController extends Controller
         register_rest_route('api/oauth', 'token', [
             'methods'  => 'POST',
             'callback' => [$this, 'api_oauth_token_post'],
-            'permission_callback' => '__return_true'
         ]);
 
     }
 
-    public function oauth_token($request)
+    public function api_oauth_token_post($request)
     {
         $provider = $request->get_param('provider');
         $code = $request->get_param('code');
