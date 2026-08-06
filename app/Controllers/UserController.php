@@ -4,10 +4,9 @@ namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
 use function IB\directory\Util\remove;
-use function IB\directory\Util\cfield;
-use function IB\directory\Util\toCamelCase;
-use function IB\directory\Util\cdfield;
-use function IB\directory\Util\t_error;
+use SimpleJWTLogin\Services\AuthenticateService;
+use SimpleJWTLogin\Libraries\JWT\JWT;
+use SimpleJWTLogin\Helpers\Jwt\JwtKeyFactory;
 
 class UserController extends Controller
 {
