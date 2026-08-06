@@ -161,7 +161,6 @@ class UserController extends Controller
     {
         switch($provider){
             case 'miniorange':
-
                 $decoded = JWT::extractDataFromJwt(
                     $oauth['id_token']
                 );
