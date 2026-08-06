@@ -158,33 +158,32 @@ class UserController extends Controller
     }
 
     private function get_user_from_oauth($provider, $oauth)
-{
-    switch($provider){
+    {
+        switch($provider){
+            case 'miniorange':
 
-        case 'miniorange':
-
-            $decoded = JWT::extractDataFromJwt(
-                $oauth['id_token']
-            );
-
-            $email = $decoded['payload']['email'];
-
-            $user = get_user_by(
-                'email',
-                $email
-            );
-
-            if (!$user) {
-                return new \WP_Error(
-                    'user_not_found',
-                    'User not found',
-                    ['status'=>404]
+                $decoded = JWT::extractDataFromJwt(
+                    $oauth['id_token']
                 );
-            }
 
-            return $user;
+                $email = $decoded['payload']['email'];
+
+                $user = get_user_by(
+                    'email',
+                    $email
+                );
+
+                if (!$user) {
+                    return new \WP_Error(
+                        'user_not_found',
+                        'User not found',
+                        ['status'=>404]
+                    );
+                }
+
+                return $user;
+        }
     }
-}
 
     function get()
     {
