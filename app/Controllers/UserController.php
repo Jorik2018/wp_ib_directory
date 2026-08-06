@@ -59,6 +59,12 @@ class UserController extends Controller
     {
         $provider = $request->get_param('provider');
 
+          if (!class_exists(\SimpleJWTLogin\Services\AuthenticateService::class)) {
+        return [
+            'error' => 'Simple JWT Login no está cargado'
+        ];
+    }
+
         switch ($provider) {
 
             case 'miniorange':
