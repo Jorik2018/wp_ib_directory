@@ -47,6 +47,73 @@ class UserController extends Controller
             'methods' => 'GET',
             'callback' => array($this, 'api_user_profile_get')
         ));
+        register_rest_route('api/oauth', 'token', [
+            'methods'  => 'POST',
+            'callback' => [$this, 'api_oauth_token_post'],
+            'permission_callback' => '__return_true'
+        ]);
+
+    }
+
+    public function oauth_token($request)
+    {
+        $provider = $request->get_param('provider');
+        $code = $request->get_param('code');
+
+        switch ($provider) {
+
+            case 'miniorange':
+
+                $tokenEndpoint =
+                    home_url('/wp-json/moserver/token');
+
+                $clientId =
+                    get_option('oauth_client_id');
+
+                $clientSecret =
+                    get_option('oauth_client_secret');
+
+                break;
+
+            default:
+
+                return new \WP_Error(
+                    'provider',
+                    'Unsupported provider',
+                    ['status'=>400]
+                );
+        }
+
+        $response = wp_remote_post(
+            $tokenEndpoint,
+            [
+                'headers'=>[
+                    'Content-Type'=>'application/x-www-form-urlencoded'
+                ],
+                'body'=>[
+                    'grant_type'=>'authorization_code',
+                    'client_id'=>$clientId,
+                    'client_secret'=>$clientSecret,
+                    'code'=>$code,
+                    'redirect_uri'=>'https://tuapp.com/auth/callback'
+                ]
+            ]
+        );
+
+        if(is_wp_error($response)){
+            return $response;
+        }
+
+        $oauth = json_decode(
+            wp_remote_retrieve_body($response),
+            true
+        );
+
+        // TODO:
+        // obtener usuario
+        // generar Simple JWT
+
+        return $oauth;
     }
 
     function get()
