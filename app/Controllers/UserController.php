@@ -165,7 +165,6 @@ class UserController extends Controller
                 $decoded = JWT::extractDataFromJwt(
                     $oauth['id_token']
                 );
-
                 $email = $decoded['payload']['email'];
                 $wordPressData = new WordPressData();
                 $jwtSettings = new SimpleJWTLoginSettings(
