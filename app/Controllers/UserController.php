@@ -3,10 +3,11 @@
 namespace IB\directory\Controllers;
 
 use WPMVC\MVC\Controller;
-use function IB\directory\Util\remove;
 use SimpleJWTLogin\Services\AuthenticateService;
 use SimpleJWTLogin\Libraries\JWT\JWT;
 use SimpleJWTLogin\Helpers\Jwt\JwtKeyFactory;
+use SimpleJWTLogin\Modules\WordPressData;
+use SimpleJWTLogin\Modules\SimpleJWTLoginSettings;
 
 class UserController extends Controller
 {
@@ -166,7 +167,11 @@ class UserController extends Controller
                 );
 
                 $email = $decoded['payload']['email'];
+                $wordPressData = new WordPressData();
 
+$jwtSettings = new SimpleJWTLoginSettings(
+    $wordPressData
+);
                 $user = get_user_by(
                     'email',
                     $email
