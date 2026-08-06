@@ -168,10 +168,9 @@ class UserController extends Controller
 
                 $email = $decoded['payload']['email'];
                 $wordPressData = new WordPressData();
-
-$jwtSettings = new SimpleJWTLoginSettings(
-    $wordPressData
-);
+                $jwtSettings = new SimpleJWTLoginSettings(
+                    $wordPressData
+                );
                 $user = get_user_by(
                     'email',
                     $email
