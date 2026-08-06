@@ -127,7 +127,7 @@ class UserController extends Controller
                     'client_id'=>$clientId,
                     'client_secret'=>$clientSecret,
                     'code'=>$code,
-                    'redirect_uri'=>'https://tuapp.com/auth/callback'
+                    'redirect_uri'=>'https://dbasure.com/erp'
                 ]
             ]
         );
